@@ -1,0 +1,34 @@
+Aluno: Fábio Eduardo Kaspar					NºUSP: 7991166
+Aluno: Ricardo Oliveira Teles				NºUSP: 7991444
+
+
+										LEAIME
+=======================================================================================================
+
+
+/*******************************************/
+/*    Como compilar e executar o ep2?   */
+/*******************************************/
+
+
+1) Para compilar e rodar o ep2 é necessário ter o pacote libreadline-dev (no Debian) já instalado, já que o programa usa as funcionalidades das bibliotecas GNU readline e GNU history. 
+
+2) Com a instalação do pacote já feita, basta abrir o terminal e digitar:
+
+$ make 
+$ ./ep2 <arquivo de entrada>    OU		$ ./ep2   
+
+
+3) Depois disso abrirá o Shell do EP2. Esse shell aceita os seguintes comandos (sem as aspas):
+
+-> "carrega <arquivo>": 
+
+-> "espaco <num>": 
+
+-> "substitui <num>": 
+
+-> "executa <intervalo>": 
+
+-> "sai": fecha o prompt do EP2
+
+=======================================================================================================
