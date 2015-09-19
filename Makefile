@@ -7,11 +7,11 @@ obj = ep2.o
 
 all: ep2
 
-ep2: ep2.o
+ep2: ep2.o -lreadline
 	$(cc) -o $@ $^	
 
 %.o: %.c
 	$(cc) -c $(debugflags) $<
 
-clean:
+clean: 
 	-rm -f $(execs) $(obj) *~ core*
