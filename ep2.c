@@ -10,7 +10,11 @@
 FILE* arqEntrada;
 int numGerEspLiv, numSubsPag;
 float intervalo;
+struct timeval inicio;
 
+
+/*********** GERENCIAMENTO DE MEMORIA ***************/
+void simulador();
 /******************* SHELL **************************/
 char *path;
 char format[80] = "";
@@ -22,13 +26,23 @@ void apagaMatriz();
 void parserCommandShell(char *line);
 /******************* UTILS **************************/
 void parserArgumentosEntrada(int argc, char* argv[]);
+float tempoDesdeInicio();
 /****************************************************/
 
 int main(int argc, char* argv[]) {
-
 	parserArgumentosEntrada(argc, argv);
 
 	return 0;
+}
+
+/*********** GERENCIAMENTO DE MEMORIA ***************/
+void simulador(){
+	gettimeofday(&inicio, NULL);
+
+	while(tempoDesdeInicio(inicio) < intervalo){
+		printf("Oiiii\n");
+	}
+
 }
 
 /******************* SHELL **************************/
@@ -47,34 +61,32 @@ void shell(){
 
 void interpretaComandosShell(){
 	if (strcmp(command[0],"carrega") == 0) {
-		printf("Carrega %s\n", command[1]);
+		arqEntrada = fopen(command[1], "r");
 	}
 	else if (strcmp(command[0],"espaco") == 0) {
 		if(atoi(command[1]) < 1 || atoi(command[1]) > 3) {
-			printf("Algortimo de gerenciamento de espaco livre nao encontrado\n");
+			printf("Numero de gerenciamento de espaco livre invalido\n");
 		}
 		else {
 			numGerEspLiv = atoi(command[1]);
-			printf("Serei executado com o algortimo de gerenciamento de espaco livre: %d\n", numGerEspLiv);
 		}
 		
 	}
 	else if (strcmp(command[0], "substitui") == 0) {
 		if(atoi(command[1]) < 1 || atoi(command[1]) > 4) {
-			printf("Algortimo de substituicao de paginas nao encontrado\n");
+			printf("Numero de substituicao de paginas invalido\n");
 		}
 		else {
 			numSubsPag = atoi(command[1]);
-			printf("Serei executado com o algortimo de substituicao de paginas: %d\n", numSubsPag);
 		}
 	}
 	else if (strcmp(command[0], "executa") == 0) {
 	 	if(atof(command[1]) <= 0){
-			printf("Intervalo invalido\n");
+			printf("Intervalo de tempo invalido\n");
 		}
 		else {
 			intervalo = atof(command[1]);
-			printf("Intervalo de tempo igual a: %f\n", intervalo);
+			simulador();
 		}
 	}
 	else if (strcmp(command[0], "sai") == 0) {
@@ -115,8 +127,16 @@ void parserArgumentosEntrada(int argc, char* argv[]) {
 		shell();
 	}
 
-	else if (argc == 2) {
+	else if (argc == 5) {			/* APAGAR DEPOIS */
 		arqEntrada = fopen(argv[1], "r");
+		numGerEspLiv = atoi(argv[2]);
+		numSubsPag = atoi(argv[3]);
+		intervalo = atof(argv[4]);
+
+		printf("Arquivo: %s\nGerencia Espaco Livre: %d\nSubstituicao Pagina: %d\nIntervalo: %f\n", 
+			argv[1], numGerEspLiv, numSubsPag, intervalo);
+
+		simulador();
 
 		if (!arqEntrada) {
 			fprintf(stderr, "ERRO ao abrir o arquivo %s\n", argv[2]);
@@ -124,7 +144,18 @@ void parserArgumentosEntrada(int argc, char* argv[]) {
 		}  
 	}
 	else {
-		printf("Formato esperado:\n./ep2 <arq_entrada> OU ./ep2\n");
+		printf("Formato esperado:\n./ep2\n");
 		exit(-2);
 	}
+}
+
+float tempoDesdeInicio(struct timeval inicio) {
+	struct timeval fim;
+	float timedif;
+
+	gettimeofday(&fim, NULL);
+	timedif = (float)(fim.tv_sec - inicio.tv_sec);
+	timedif += (float)(fim.tv_usec - inicio.tv_usec)/1000000;
+
+	return timedif;
 }
