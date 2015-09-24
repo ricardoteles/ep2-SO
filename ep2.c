@@ -12,7 +12,6 @@ int numGerEspLiv, numSubsPag;
 float intervalo;
 struct timeval inicio;
 
-
 /*********** GERENCIAMENTO DE MEMORIA ***************/
 void simulador();
 /******************* SHELL **************************/
@@ -27,6 +26,7 @@ void parserCommandShell(char *line);
 /******************* UTILS **************************/
 void parserArgumentosEntrada(int argc, char* argv[]);
 float tempoDesdeInicio();
+void* mallocSeguro(size_t bytes);
 /****************************************************/
 
 int main(int argc, char* argv[]) {
@@ -158,4 +158,13 @@ float tempoDesdeInicio(struct timeval inicio) {
 	timedif += (float)(fim.tv_usec - inicio.tv_usec)/1000000;
 
 	return timedif;
+}
+
+void* mallocSeguro(size_t bytes) {
+	void* p = malloc(bytes);
+	if (!p) {
+		fprintf(stderr, "ERRO na alocação de memória!\n");
+		exit(0);
+	}
+	return p;
 }
