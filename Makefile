@@ -2,12 +2,12 @@ cc = gcc
 cflags = -Wall
 debugflags = -g
 
-exes = ep2 simulador
-objs = ep2.o simulador.o linkedList.o
+exes = ep2 memoryManager
+objs = ep2.o memoryManager.o linkedList.o process.o
 
-all: ep2 simulador
+all: ep2 memoryManager
 
-simulador: simulador.o linkedList.o
+memoryManager: memoryManager.o linkedList.o process.o
 	$(cc) -o $@ $^
 	
 ep2: ep2.o -lreadline

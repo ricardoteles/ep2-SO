@@ -1,4 +1,3 @@
-/********************** MAPA DE MEMÓRIA  ***************************/
 typedef struct segmento* Link;
 
 struct segmento{
@@ -6,11 +5,14 @@ struct segmento{
 	int base;
 	int tamanho;
 	Link prox;
+	Link ant;
 } Segmento;
 
 Link head, tail;
 
 void initList(int totalMemoria);
-void insertItemList(Link ant, char info, int base, int tamanho);
+void insertItemList(Link aux, char info, int base, int tamanho);
 void splitHoleInPL(Link aux, int tamanho);
+void removeList(Link aux, Link rem);
+void printList();
 Link mallocItemList();
