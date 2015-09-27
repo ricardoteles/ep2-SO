@@ -2,16 +2,19 @@ cc = gcc
 cflags = -Wall
 debugflags = -g
 
-execs = ep2
-obj = ep2.o
+exes = ep2 simulador
+objs = ep2.o simulador.o linkedList.o
 
-all: ep2
+all: ep2 simulador
 
+simulador: simulador.o linkedList.o
+	$(cc) -o $@ $^
+	
 ep2: ep2.o -lreadline
-	$(cc) -o $@ $^	
+	$(cc) -o $@ $^
 
-%.o: %.c
+%.o: %.c linkedList.h
 	$(cc) -c $(debugflags) $<
 
-clean: 
-	-rm -f $(execs) $(obj) *~ core*
+clean:
+	-rm -f $(exes) $(objs) *~ core*

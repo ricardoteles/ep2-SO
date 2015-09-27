@@ -1,8 +1,7 @@
 #include <readline/readline.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <unistd.h>
 
 #define LINMAX 10
 #define COLMAX 50
@@ -10,24 +9,17 @@
 FILE* arqEntrada;
 int numGerEspLiv, numSubsPag;
 float intervalo;
-struct timeval inicio;
 
-/*********** GERENCIAMENTO DE MEMORIA ***************/
-void simulador();
-/******************* SHELL **************************/
-char *path;
-char format[80] = "";
-char command[LINMAX][COLMAX];
+char word[LINMAX][COLMAX];
 
 void shell();
-void interpretaComandosShell();
-void apagaMatriz();
+int interpretaComandosShell();
+void limpaMatriz();
 void parserCommandShell(char *line);
+
 /******************* UTILS **************************/
 void parserArgumentosEntrada(int argc, char* argv[]);
-float tempoDesdeInicio();
-void* mallocSeguro(size_t bytes);
-/****************************************************/
+
 
 int main(int argc, char* argv[]) {
 	parserArgumentosEntrada(argc, argv);
@@ -35,74 +27,106 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
-/*********** GERENCIAMENTO DE MEMORIA ***************/
-void simulador(){
-	gettimeofday(&inicio, NULL);
-
-	while(tempoDesdeInicio(inicio) < intervalo){
-		printf("Oiiii\n");
-	}
-
-}
-
-/******************* SHELL **************************/
-void shell(){
+void shell() {
 	printf("\n--------------------- SHELL EP2 ---------------------\n\n");
-	char* line = readline("[ep2]: ");
+	char* line;
+	int ret = 1;
 
-	do {
-		add_history (line);
-		apagaMatriz();
-		parserCommandShell(line);
-		interpretaComandosShell();
+	while (ret) {
 		line = readline("[ep2]: ");
-	} while(1);
+		add_history (line);
+		limpaMatriz();
+		parserCommandShell(line);
+		ret = interpretaComandosShell();
+	}
 }
 
-void interpretaComandosShell(){
-	if (strcmp(command[0],"carrega") == 0) {
-		arqEntrada = fopen(command[1], "r");
+int interpretaComandosShell() {
+	if (strcmp(word[0],"carrega") == 0) {
+		arqEntrada = fopen(word[1], "r");
+
+		if (!arqEntrada) {
+			fprintf(stderr, "ERRO ao abrir o arquivo %s\n", word[1]);
+		}
 	}
-	else if (strcmp(command[0],"espaco") == 0) {
-		if(atoi(command[1]) < 1 || atoi(command[1]) > 3) {
+	else if (strcmp(word[0],"espaco") == 0) {
+		if(atoi(word[1]) < 1 || atoi(word[1]) > 3) {
 			printf("Numero de gerenciamento de espaco livre invalido\n");
 		}
 		else {
-			numGerEspLiv = atoi(command[1]);
+			numGerEspLiv = atoi(word[1]);
 		}
 		
 	}
-	else if (strcmp(command[0], "substitui") == 0) {
-		if(atoi(command[1]) < 1 || atoi(command[1]) > 4) {
+	else if (strcmp(word[0], "substitui") == 0) {
+		if(atoi(word[1]) < 1 || atoi(word[1]) > 4) {
 			printf("Numero de substituicao de paginas invalido\n");
 		}
 		else {
-			numSubsPag = atoi(command[1]);
+			numSubsPag = atoi(word[1]);
 		}
 	}
-	else if (strcmp(command[0], "executa") == 0) {
-	 	if(atof(command[1]) <= 0){
+	else if (strcmp(word[0], "executa") == 0) {
+	 	if(atof(word[1]) <= 0){
 			printf("Intervalo de tempo invalido\n");
 		}
 		else {
-			intervalo = atof(command[1]);
-			simulador();
+			intervalo = atof(word[1]);
+			
+			printf("Arquivo: %s\nGerencia Espaco Livre: %d\nSubstituicao Pagina: %d\nIntervalo: %f\n", 
+			"", numGerEspLiv, numSubsPag, intervalo);
+			
+			char *argv[] = {"./simulador", NULL};
+			
+			if (fork() == 0) {
+				execve("./simulador", argv, NULL);
+			} else {
+				waitpid(-1, 0, 0);
+			}
 		}
 	}
-	else if (strcmp(command[0], "sai") == 0) {
-		exit(0);
+	else if (strcmp(word[0], "sai") == 0) {
+		return 0;
 	}
 	else {
-		fprintf(stderr, "comando %s inválido!\n", command[0]);
+		fprintf(stderr, "comando %s inválido!\n", word[0]);
+	}
+
+	return 1;
+}
+
+/******************* UTILS **************************/
+void parserArgumentosEntrada(int argc, char* argv[]) {
+	if(argc == 1) {
+		shell();
+	}
+
+	/*else if (argc == 5) {			
+		arqEntrada = fopen(argv[1], "r");
+		numGerEspLiv = atoi(argv[2]);
+		numSubsPag = atoi(argv[3]);
+		intervalo = atof(argv[4]);
+
+		if (!arqEntrada) {
+			fprintf(stderr, "ERRO ao abrir o arquivo %s\n", argv[2]);
+			exit(0);
+		}
+
+		printf("Arquivo: %s\nGerencia Espaco Livre: %d\nSubstituicao Pagina: %d\nIntervalo: %f\n", 
+			argv[1], numGerEspLiv, numSubsPag, intervalo);
+	} */
+	else {
+		printf("Formato esperado:\n./ep2\n");
+		exit(0);
 	}
 }
 
-void apagaMatriz() {
+void limpaMatriz() {
 	int i, j;
 
 	for (i = 0; i < LINMAX; i++) {
 		for (j = 0; j < COLMAX; j++) {
-			command[i][j] = 0;
+			word[i][j] = 0;
 		}
 	}
 }
@@ -112,59 +136,11 @@ void parserCommandShell(char *line) {
 
 	for(i = 0; line[i] != '\0'; i++) {
 		if(line[i] != ' ') {
-			command[lin][col++] = line[i];
+			word[lin][col++] = line[i];
 		}
 		else if(col != 0) {
 			lin++;
 			col = 0;
 		}
 	}
-}
-
-/******************* UTILS **************************/
-void parserArgumentosEntrada(int argc, char* argv[]) {
-	if(argc == 1) {
-		shell();
-	}
-
-	else if (argc == 5) {			/* APAGAR DEPOIS */
-		arqEntrada = fopen(argv[1], "r");
-		numGerEspLiv = atoi(argv[2]);
-		numSubsPag = atoi(argv[3]);
-		intervalo = atof(argv[4]);
-
-		printf("Arquivo: %s\nGerencia Espaco Livre: %d\nSubstituicao Pagina: %d\nIntervalo: %f\n", 
-			argv[1], numGerEspLiv, numSubsPag, intervalo);
-
-		simulador();
-
-		if (!arqEntrada) {
-			fprintf(stderr, "ERRO ao abrir o arquivo %s\n", argv[2]);
-			exit(0);
-		}  
-	}
-	else {
-		printf("Formato esperado:\n./ep2\n");
-		exit(-2);
-	}
-}
-
-float tempoDesdeInicio(struct timeval inicio) {
-	struct timeval fim;
-	float timedif;
-
-	gettimeofday(&fim, NULL);
-	timedif = (float)(fim.tv_sec - inicio.tv_sec);
-	timedif += (float)(fim.tv_usec - inicio.tv_usec)/1000000;
-
-	return timedif;
-}
-
-void* mallocSeguro(size_t bytes) {
-	void* p = malloc(bytes);
-	if (!p) {
-		fprintf(stderr, "ERRO na alocação de memória!\n");
-		exit(0);
-	}
-	return p;
 }

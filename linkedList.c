@@ -1,43 +1,46 @@
 #include "linkedList.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 void initList(int totalMemoria) {
-	inicio = (Link) mallocSeguro(sizeof(Segmento));
-	inicio->info = 'L';
-	inicio->base = 0;
-	inicio->tamanho = totalMemoria;	
-	inicio->next = NULL;
+	head = (Link) mallocItemList();
+	head->info = 'L';
+	head->base = 0;
+	head->tamanho = totalMemoria;	
+	head->prox = NULL;
 }
 
-void insertProcessList(int tamanho) {
-	Link aux;
-
-	for(aux = inicio; aux != NULL; aux = aux->prox) {
-		if(aux->info == 'L') {
-			if(aux->tamanho == tamanho) {
-				aux->info = 'P'; // ocupa toda lacuna
-			}
-			else if(aux->tamanho > tamanho) {
-				splitSegment_L_in_PL(aux, tamanho);
-			}
-		}
-	}
-}
-
-void splitSegment_L_in_PL(Link aux, int tamanho) {
+void splitHoleInPL(Link aux, int tamanho) {
 	int tamanhoAntigo = aux->tamanho;
 
 	aux->info = 'P';
 	aux->tamanho = tamanho;
 
-	insertList(aux, 'L', aux->base + aux->tamanho, tamanhoAntigo - aux->tamanho);
+	insertItemList(aux, 'L', aux->base + aux->tamanho, tamanhoAntigo - aux->tamanho);
 }
 
-void insertList(Link ant, char info, int base, int tamanho) {
-	Link novo = (Link) mallocSeguro(sizeof(Segmento));
+void setContentItemList(Link p, char info, int base, int tamanho) {
+	p->info = info;
+	p->base = base;
+	p->tamanho = tamanho;
+}
+
+void insertItemList(Link ant, char info, int base, int tamanho) {
+	Link novo = mallocItemList();
 	novo->info = info;
 	novo->base = base;
 	novo->tamanho = tamanho;
 
-	novo->prox = aux->prox;
-	aux->prox = novo;
+	novo->prox = ant->prox;
+	ant->prox = novo;
+}
+
+Link mallocItemList() {
+	Link p = (Link) malloc(sizeof(Segmento));
+	if (!p) {
+		fprintf(stderr, "Memoria insuficiente!\n");
+		exit(1);
+	}
+
+	return p;
 }
