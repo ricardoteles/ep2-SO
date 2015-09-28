@@ -1,20 +1,26 @@
 #include "linkedList.h"
+#include "process.h"
 
-void insertProcess(int tamanho) {
-	Link aux;
+static void splitHoleInPL(Link aux, int tamanho) {
+	int tamanhoAntigo = aux->tamanho;
 
-	for(aux = head->prox; aux != tail; aux = aux->prox) {
-		if(aux->info == 'L') {
-			if(aux->tamanho == tamanho) {
-				aux->info = 'P'; // ocupa toda lacuna
-				break;
-			}
-			else if(aux->tamanho > tamanho) {
-				splitHoleInPL(aux, tamanho);
-				break;
-			}
-		}
+	aux->info = 'P';
+	aux->tamanho = tamanho;
+
+	insertItemList(aux, 'L', aux->base + aux->tamanho, tamanhoAntigo - aux->tamanho);
+}
+
+int insertProcess(Link aux, int tamanho) {
+	if(aux->tamanho == tamanho) {
+		aux->info = 'P'; // ocupa toda lacuna
+		return 1;
 	}
+	else if(aux->tamanho > tamanho) {
+		splitHoleInPL(aux, tamanho);
+		return 1;
+	}
+
+	return 0;
 }
 
 void removeProcess(Link meio){

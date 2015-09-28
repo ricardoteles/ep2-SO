@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 void initList(int totalMemoria) {
-	Link novo = mallocItemList();
 	head = mallocItemList();
 	tail = mallocItemList();
 	
@@ -32,15 +31,6 @@ void insertItemList(Link aux, char info, int base, int tamanho) {
 	aux->prox->ant = novo;
 	aux->prox = novo;
 	novo->ant = aux;
-}
-
-void splitHoleInPL(Link aux, int tamanho) {
-	int tamanhoAntigo = aux->tamanho;
-
-	aux->info = 'P';
-	aux->tamanho = tamanho;
-
-	insertItemList(aux, 'L', aux->base + aux->tamanho, tamanhoAntigo - aux->tamanho);
 }
 
 void removeList(Link aux, Link rem) {

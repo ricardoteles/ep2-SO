@@ -13,6 +13,11 @@ struct segmento{
 
 Link head, tail;
 
+Link inicioNextFit;
+
+void firstFit(int tamanho);
+void nextFit(int tamanho);
+
 void initList(int totalMemoria);
 void splitHoleInPL(Link aux, int tamanho);
 void insertItemList(Link aux, char info, int base, int tamanho);
@@ -20,32 +25,51 @@ void removeList(Link aux, Link rem);
 void printList();
 Link mallocItemList();
 
-void insertProcess(int tamanho);
+int insertProcess(Link aux, int tamanho);
 void removeProcess(Link aux);
 
 /********************* MAIN ****************************************/
 
-int main(){
-	initList(100);
+int main(int argc, char* argv[]){
+	initList(13);
 
-	insertProcess(20);
-	insertProcess(50);
-	insertProcess(15);
-	insertProcess(5);
+	/* inicializacao de um caso teste*/
+	firstFit(3);
+	firstFit(2);
+	firstFit(2);
+	firstFit(4);
+	firstFit(1);
+
+	removeProcess(head->prox->prox);
+	removeProcess(head->prox->prox->prox->prox);
 	printList();
+	/********************************/
 
+	if(argc == 2 && atoi(argv[1]) == 1){
+		printf("First Fit!!!\n");
 
-	removeProcess(head->prox);
-	printList();
-
-	removeProcess(head->prox->prox->prox);
-	printList();
+		firstFit(3);
+		firstFit(1);
+		firstFit(1);
 	
-	removeProcess(head->prox->prox);
-	printList();
+		printList();
+	}
+	else if(argc == 2 && atoi(argv[1]) == 2){
+		printf("Next Fit!!!\n");
+		
+		inicioNextFit = head->prox;
 
-	removeProcess(head->prox->prox);
-	printList();
+		nextFit(3);
+		nextFit(1);
+		nextFit(1);
+
+		printList();
+	}
+	else{
+		printf("Ta errado sua anta!!!\n");
+		exit(-1);
+	}
+
 	return 0;
 }
 
@@ -70,21 +94,45 @@ void initList(int totalMemoria) {
 	insertItemList(head, 'L', 0, totalMemoria);	
 }
 
-void insertProcess(int tamanho) {
+void firstFit(int tamanho) {
 	Link aux;
 
 	for(aux = head->prox; aux != tail; aux = aux->prox) {
 		if(aux->info == 'L') {
-			if(aux->tamanho == tamanho) {
-				aux->info = 'P'; // ocupa toda lacuna
-				break;
-			}
-			else if(aux->tamanho > tamanho) {
-				splitHoleInPL(aux, tamanho);
+			if(insertProcess(aux, tamanho))	break;
+		}
+	}
+}
+
+void nextFit(int tamanho) {
+	Link aux = inicioNextFit;
+
+	do{
+		if(aux->info == 'L') {					/* aux nunca sera o head e nem o tail*/
+			if(insertProcess(aux, tamanho)) {	
+				inicioNextFit = aux;
 				break;
 			}
 		}
+
+		aux = aux->prox;
+
+		if(aux == tail) aux = head->prox;
+
+	} while(aux != inicioNextFit);	
+}
+
+int insertProcess(Link aux, int tamanho) {
+	if(aux->tamanho == tamanho) {
+		aux->info = 'P'; // ocupa toda lacuna
+		return 1;
 	}
+	else if(aux->tamanho > tamanho) {
+		splitHoleInPL(aux, tamanho);
+		return 1;
+	}
+
+	return 0;
 }
 
 void removeProcess(Link meio){

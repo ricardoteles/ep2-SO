@@ -2,18 +2,15 @@ cc = gcc
 cflags = -Wall
 debugflags = -g
 
-exes = ep2 memoryManager
+exes = ep2
 objs = ep2.o memoryManager.o linkedList.o process.o
 
-all: ep2 memoryManager
-
-memoryManager: memoryManager.o linkedList.o process.o
-	$(cc) -o $@ $^
+all: ep2
 	
-ep2: ep2.o -lreadline
+ep2: $(objs) -lreadline
 	$(cc) -o $@ $^
 
-%.o: %.c linkedList.h
+%.o: %.c memoryManager.h linkedList.h process.h
 	$(cc) -c $(debugflags) $<
 
 clean:

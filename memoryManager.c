@@ -1,34 +1,72 @@
-#include <unistd.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #include "linkedList.h"
 #include "process.h"
+#include "memoryManager.h"
 
-struct timeval inicio;
+Link inicioNextFit;
 
-float tempoDesdeInicio();
 
-/*********** GERENCIAMENTO DE MEMORIA ***************/
-int main() {
-	gettimeofday(&inicio, NULL);
+void simulador(int numGerEspLiv){
+	initList(13);
 
-	/*while(tempoDesdeInicio(inicio) < intervalo){
-		printf("Oiiii\n");
-	}*/
+	/* inicializacao de um caso teste*/
+	firstFit(3);
+	firstFit(2);
+	firstFit(2);
+	firstFit(4);
+	firstFit(1);
 
-	printf("Devemos simular os algoritmos de memória seus manganões!\n");
+	removeProcess(head->prox->prox);
+	removeProcess(head->prox->prox->prox->prox);
+	printList();
+	/********************************/
 
-	return 0;
+	if(numGerEspLiv == 1){
+		printf("First Fit!!!\n");
+
+		firstFit(3);
+		firstFit(1);
+		firstFit(1);
+	
+		printList();
+	}
+	else if(numGerEspLiv == 2){
+		printf("Next Fit!!!\n");
+		
+		inicioNextFit = head->prox;
+
+		nextFit(3);
+		nextFit(1);
+		nextFit(1);
+
+		printList();
+	}
 }
 
-float tempoDesdeInicio(struct timeval inicio) {
-	struct timeval fim;
-	float timedif;
+void firstFit(int tamanho) {
+	Link aux;
 
-	gettimeofday(&fim, NULL);
-	timedif = (float)(fim.tv_sec - inicio.tv_sec);
-	timedif += (float)(fim.tv_usec - inicio.tv_usec)/1000000;
+	for(aux = head->prox; aux != tail; aux = aux->prox) {
+		if(aux->info == 'L') {
+			if(insertProcess(aux, tamanho))	break;
+		}
+	}
+}
 
-	return timedif;
+void nextFit(int tamanho) {
+	Link aux = inicioNextFit;
+
+	do{
+		if(aux->info == 'L') {					/* aux nunca sera o head e nem o tail*/
+			if(insertProcess(aux, tamanho)) {	
+				inicioNextFit = aux;
+				break;
+			}
+		}
+
+		aux = aux->prox;
+
+		if(aux == tail) aux = head->prox;
+
+	} while(aux != inicioNextFit);	
 }

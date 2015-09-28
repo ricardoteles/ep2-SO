@@ -1,7 +1,8 @@
-#include <readline/readline.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <readline/readline.h>
+#include "memoryManager.h"
 
 #define LINMAX 10
 #define COLMAX 50
@@ -11,15 +12,16 @@ int numGerEspLiv, numSubsPag;
 float intervalo;
 
 char word[LINMAX][COLMAX];
+struct timeval inicio;
 
 void shell();
 int interpretaComandosShell();
-void limpaMatriz();
-void parserCommandShell(char *line);
-
 /******************* UTILS **************************/
 void parserArgumentosEntrada(int argc, char* argv[]);
-
+void limpaMatriz();
+void parserCommandShell(char *line);
+float tempoDesdeInicio();
+/***************************************************/
 
 int main(int argc, char* argv[]) {
 	parserArgumentosEntrada(argc, argv);
@@ -75,14 +77,8 @@ int interpretaComandosShell() {
 			
 			printf("Arquivo: %s\nGerencia Espaco Livre: %d\nSubstituicao Pagina: %d\nIntervalo: %f\n", 
 			"", numGerEspLiv, numSubsPag, intervalo);
-			
-			char *argv[] = {"./simulador", NULL};
-			
-			if (fork() == 0) {
-				execve("./simulador", argv, NULL);
-			} else {
-				waitpid(-1, 0, 0);
-			}
+
+			simulador(numGerEspLiv);
 		}
 	}
 	else if (strcmp(word[0], "sai") == 0) {
@@ -143,4 +139,15 @@ void parserCommandShell(char *line) {
 			col = 0;
 		}
 	}
+}
+
+float tempoDesdeInicio(struct timeval inicio) {
+	struct timeval fim;
+	float timedif;
+
+	gettimeofday(&fim, NULL);
+	timedif = (float)(fim.tv_sec - inicio.tv_sec);
+	timedif += (float)(fim.tv_usec - inicio.tv_usec)/1000000;
+
+	return timedif;
 }
