@@ -21,7 +21,7 @@ void nextFit(int tamanho);
 void initList(int totalMemoria);
 void splitHoleInPL(Link aux, int tamanho);
 void insertItemList(Link aux, char info, int base, int tamanho);
-void removeList(Link aux, Link rem);
+void removeItemList(Link aux, Link rem);
 void printList();
 Link mallocItemList();
 
@@ -146,18 +146,18 @@ void removeProcess(Link meio){
 		meio->info = 'L';
 		meio->tamanho += dir->tamanho;
 
-		removeList(meio, dir);
+		removeItemList(meio, dir);
 	}
 	else if(esq->info == 'L' && dir->info == 'P') {	/* LPP vira LP */
 		esq->tamanho += meio->tamanho;
 
-		removeList(esq, meio); 
+		removeItemList(esq, meio); 
 	}
 	else if(esq->info == 'L' && dir->info == 'L') {	/* LPL vira L */
 		esq->tamanho = esq->tamanho + meio->tamanho + dir->tamanho;
 
-		removeList(meio, dir); 
-		removeList(esq, meio); 
+		removeItemList(meio, dir); 
+		removeItemList(esq, meio); 
 	} 
 }
 
@@ -182,7 +182,7 @@ void insertItemList(Link aux, char info, int base, int tamanho) {
 	novo->ant = aux;
 }
 
-void removeList(Link aux, Link rem) {
+void removeItemList(Link aux, Link rem) {
 	aux->prox = rem->prox;
 	rem->prox->ant = aux;
 

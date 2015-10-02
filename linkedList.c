@@ -33,7 +33,7 @@ void insertItemList(Link aux, char info, int base, int tamanho) {
 	novo->ant = aux;
 }
 
-void removeList(Link aux, Link rem) {
+void removeItemList(Link aux, Link rem) {
 	aux->prox = rem->prox;
 	rem->prox->ant = aux;
 

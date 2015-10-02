@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include "process.h"
+#include "linkedList.h"
 #include "memoryManager.h"
 
 void firstFit(int tamanho, int pid) {
@@ -13,9 +13,14 @@ void firstFit(int tamanho, int pid) {
 }
 
 void nextFit(int tamanho, int pid) {
+	static Link inicioNextFit = 0;
+	
+	if (inicioNextFit == 0) 
+		inicioNextFit = head->prox;
+
 	Link aux = inicioNextFit;
 
-	do{
+	do {
 		if(aux->info == 'L') {					/* aux nunca sera o head e nem o tail*/
 			if(insertProcess(aux, tamanho, pid)) {	
 				inicioNextFit = aux;
@@ -27,5 +32,5 @@ void nextFit(int tamanho, int pid) {
 
 		if(aux == tail) aux = head->prox;
 
-	} while(aux != inicioNextFit);	
+	} while (aux != inicioNextFit);	
 }

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include "inicializacao.h"
+#include "prompt.h"
 #include "memoryManager.h"
 
 struct timeval inicio;
@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
-void simulador(int numGerEspLiv){
+void simulador(int numGerEspLiv) {
 	initList(memTotal);
 
 	pthread_t procs[NMAX_PROCS];

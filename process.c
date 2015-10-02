@@ -1,6 +1,5 @@
-#include "linkedList.h"
 #include "process.h"
-#include "inicializacao.h"
+#include "prompt.h"
 
 static void splitHoleInPL(Link aux, int tamanho) {
 	int tamanhoAntigo = aux->tamanho;
@@ -37,18 +36,18 @@ void removeProcess(Link meio, int pid){
 		meio->info = 'L';
 		meio->tamanho += dir->tamanho;
 
-		removeList(meio, dir);
+		removeItemList(meio, dir);
 	}
 	else if(esq->info == 'L' && dir->info == 'P') {	/* LPP vira LP */
 		esq->tamanho += meio->tamanho;
 
-		removeList(esq, meio); 
+		removeItemList(esq, meio); 
 	}
 	else if(esq->info == 'L' && dir->info == 'L') {	/* LPL vira L */
 		esq->tamanho = esq->tamanho + meio->tamanho + dir->tamanho;
 
-		removeList(meio, dir); 
-		removeList(esq, meio); 
+		removeItemList(meio, dir); 
+		removeItemList(esq, meio); 
 	}
 
 	printList();	// TODO: isso serve para teste (apagar depois)

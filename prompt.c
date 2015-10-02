@@ -1,9 +1,18 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <readline/readline.h>
-#include "inicializacao.h"
+#include "prompt.h"
 
+#define LINMAX 10
+#define COLMAX 50
+
+int interpretaComandosShell();
+void limpaMatriz();
+void parserCommandShell(char *line);
+void leArquivoEntrada();
+
+FILE* arqEntrada;
 char word[LINMAX][COLMAX];
 
 void shell() {
