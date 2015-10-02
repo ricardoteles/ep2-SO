@@ -1,3 +1,6 @@
+#ifndef LINKEDLIST_H 
+#define LINKEDLIST_H
+
 typedef struct segmento* Link;
 
 struct segmento{
@@ -15,3 +18,5 @@ void insertItemList(Link aux, char info, int base, int tamanho);
 void removeList(Link aux, Link rem);
 void printList();
 Link mallocItemList();
+
+#endif

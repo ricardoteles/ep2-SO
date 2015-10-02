@@ -1,27 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <readline/readline.h>
-#include "memoryManager.h"
+#include <pthread.h>
+#include <semaphore.h>
+#include "inicializacao.h"
 
-#define LINMAX 10
-#define COLMAX 50
-
-FILE* arqEntrada;
-int numGerEspLiv, numSubsPag;
-float intervalo;
-
-char word[LINMAX][COLMAX];
 struct timeval inicio;
+sem_t mutex;
 
-void shell();
-int interpretaComandosShell();
-/******************* UTILS **************************/
+void simulador(int numGerEspLiv);
+void *Processo(void *a);
+int compare_arrive(const void *a,const void *b);
 void parserArgumentosEntrada(int argc, char* argv[]);
-void limpaMatriz();
-void parserCommandShell(char *line);
 float tempoDesdeInicio();
-/***************************************************/
+
 
 int main(int argc, char* argv[]) {
 	parserArgumentosEntrada(argc, argv);
@@ -29,69 +20,75 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
-void shell() {
-	printf("\n--------------------- SHELL EP2 ---------------------\n\n");
-	char* line;
-	int ret = 1;
+void simulador(int numGerEspLiv){
+	initList(memTotal);
 
-	while (ret) {
-		line = readline("[ep2]: ");
-		add_history (line);
-		limpaMatriz();
-		parserCommandShell(line);
-		ret = interpretaComandosShell();
+	pthread_t procs[NMAX_PROCS];
+	long i;
+	int pos;
+
+	qsort(trace, nProcs, sizeof(PROCESS), compare_arrive);
+	
+	for(pos = 0; pos < nProcs; pos++) {
+		trace[pos].pid = pos;	
 	}
-}
 
-int interpretaComandosShell() {
-	if (strcmp(word[0],"carrega") == 0) {
-		arqEntrada = fopen(word[1], "r");
-
-		if (!arqEntrada) {
-			fprintf(stderr, "ERRO ao abrir o arquivo %s\n", word[1]);
-		}
+	if (sem_init(&mutex, 0, 1)) {
+		fprintf(stderr, "ERRO ao criar semaforo mutexQueue\n");
+		exit(0);
 	}
-	else if (strcmp(word[0],"espaco") == 0) {
-		if(atoi(word[1]) < 1 || atoi(word[1]) > 3) {
-			printf("Numero de gerenciamento de espaco livre invalido\n");
-		}
-		else {
-			numGerEspLiv = atoi(word[1]);
-		}
+
+	gettimeofday(&inicio, NULL);
+	
+	for (i = 0; i < nProcs; i++) {
+		while (tempoDesdeInicio(inicio) < trace[i].t0) usleep(50000);	// TODO: ver tempo inteiro
 		
+		if (pthread_create(&procs[i], NULL, Processo, (void *) &trace[i].pid)) {
+            printf("\n ERROR creating thread procs[%ld]\n", i);
+            exit(1);
+        }
 	}
-	else if (strcmp(word[0], "substitui") == 0) {
-		if(atoi(word[1]) < 1 || atoi(word[1]) > 4) {
-			printf("Numero de substituicao de paginas invalido\n");
-		}
-		else {
-			numSubsPag = atoi(word[1]);
-		}
-	}
-	else if (strcmp(word[0], "executa") == 0) {
-	 	if(atof(word[1]) <= 0){
-			printf("Intervalo de tempo invalido\n");
-		}
-		else {
-			intervalo = atof(word[1]);
-			
-			printf("Arquivo: %s\nGerencia Espaco Livre: %d\nSubstituicao Pagina: %d\nIntervalo: %f\n", 
-			"", numGerEspLiv, numSubsPag, intervalo);
+	
+	for (i = 0; i < nProcs; i++) {
+        if (pthread_join(procs[i], NULL)) {
+			printf("\n ERROR joining thread procs[%ld]\n", i);
+			exit(1);
+        }
+    }
 
-			simulador(numGerEspLiv);
-		}
-	}
-	else if (strcmp(word[0], "sai") == 0) {
-		return 0;
-	}
-	else {
-		fprintf(stderr, "comando %s inválido!\n", word[0]);
-	}
-
-	return 1;
+    printf("\n\nAgora vem a lista\n\n");
+    printList();
 }
 
-/******************* UTILS **************************/
+
+			
+
+void *Processo(void *a) {
+	int* id = (int*) a;
+	int pid = (*id);
+
+
+	sem_wait(&mutex);
+	printf("Ola eu sou a thread: %d\n", pid);
+	firstFit(trace[pid].b, pid);
+	sem_post(&mutex);
+
+	while(tempoDesdeInicio(inicio) < trace[pid].tf) usleep(50000);
+
+	if(pid != 5) removeProcess(trace[pid].myLink, pid);	//TODO: analisar esse caso
+
+	return NULL;
+}
+
+int compare_arrive(const void *a,const void *b) {
+	PROCESS *x = (PROCESS *) a;
+	PROCESS *y = (PROCESS *) b;
+
+	if (x->t0 < y->t0) return -1;
+	else if (x->t0 > y->t0) return 1;
+	else return 0;
+}
+
 void parserArgumentosEntrada(int argc, char* argv[]) {
 	if(argc == 1) {
 		shell();
@@ -117,30 +114,6 @@ void parserArgumentosEntrada(int argc, char* argv[]) {
 	}
 }
 
-void limpaMatriz() {
-	int i, j;
-
-	for (i = 0; i < LINMAX; i++) {
-		for (j = 0; j < COLMAX; j++) {
-			word[i][j] = 0;
-		}
-	}
-}
-
-void parserCommandShell(char *line) {
-	int i, lin = 0, col = 0;
-
-	for(i = 0; line[i] != '\0'; i++) {
-		if(line[i] != ' ') {
-			word[lin][col++] = line[i];
-		}
-		else if(col != 0) {
-			lin++;
-			col = 0;
-		}
-	}
-}
-
 float tempoDesdeInicio(struct timeval inicio) {
 	struct timeval fim;
 	float timedif;
@@ -151,3 +124,40 @@ float tempoDesdeInicio(struct timeval inicio) {
 
 	return timedif;
 }
+
+// void simulador(int numGerEspLiv){
+// 	initList(13);
+
+// 	/* inicializacao de um caso teste*/
+// 	firstFit(3);
+// 	firstFit(2);
+// 	firstFit(2);
+// 	firstFit(4);
+// 	firstFit(1);
+
+// 	removeProcess(head->prox->prox);
+// 	removeProcess(head->prox->prox->prox->prox);
+// 	printList();
+// 	******************************
+
+// 	if(numGerEspLiv == 1){
+// 		printf("First Fit!!!\n");
+
+// 		firstFit(3);
+// 		firstFit(1);
+// 		firstFit(1);
+	
+// 		printList();
+// 	}
+// 	else if(numGerEspLiv == 2){
+// 		printf("Next Fit!!!\n");
+		
+// 		inicioNextFit = head->prox;
+
+// 		nextFit(3);
+// 		nextFit(1);
+// 		nextFit(1);
+
+// 		printList();
+// 	}
+// }

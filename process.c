@@ -1,5 +1,6 @@
 #include "linkedList.h"
 #include "process.h"
+#include "inicializacao.h"
 
 static void splitHoleInPL(Link aux, int tamanho) {
 	int tamanhoAntigo = aux->tamanho;
@@ -10,20 +11,22 @@ static void splitHoleInPL(Link aux, int tamanho) {
 	insertItemList(aux, 'L', aux->base + aux->tamanho, tamanhoAntigo - aux->tamanho);
 }
 
-int insertProcess(Link aux, int tamanho) {
+int insertProcess(Link aux, int tamanho, int pid) {
 	if(aux->tamanho == tamanho) {
 		aux->info = 'P'; // ocupa toda lacuna
+		trace[pid].myLink = aux;
 		return 1;
 	}
 	else if(aux->tamanho > tamanho) {
 		splitHoleInPL(aux, tamanho);
+		trace[pid].myLink = aux;
 		return 1;
 	}
 
 	return 0;
 }
 
-void removeProcess(Link meio){
+void removeProcess(Link meio, int pid){
 	Link esq = meio->ant;
  	Link dir = meio->prox;
 
