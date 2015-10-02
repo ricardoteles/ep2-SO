@@ -62,7 +62,6 @@ void *Processo(void *a) {
 	int* id = (int*) a;
 	int pid = (*id);
 
-
 	sem_wait(&mutex);
 	printf("Ola eu sou a thread: %d\n", pid);
 	firstFit(trace[pid].b, pid);

@@ -7,12 +7,12 @@
 #define LINMAX 10
 #define COLMAX 50
 
-int interpretaComandosShell();
-void limpaMatriz();
-void parserCommandShell(char *line);
-void leArquivoEntrada();
+static int interpretaComandosShell();
+static void limpaMatriz();
+static void parserCommandShell(char *line);
+static void leArquivoEntrada();
 
-FILE* arqEntrada;
+FILE* arqEntrada = NULL;
 char word[LINMAX][COLMAX];
 
 void shell() {
@@ -29,7 +29,7 @@ void shell() {
 	}
 }
 
-int interpretaComandosShell() {
+static int interpretaComandosShell() {
 	if (strcmp(word[0],"carrega") == 0) {
 		arqEntrada = fopen(word[1], "r");
 		leArquivoEntrada();
@@ -39,33 +39,34 @@ int interpretaComandosShell() {
 		}
 	}
 	else if (strcmp(word[0],"espaco") == 0) {
-		if(atoi(word[1]) < 1 || atoi(word[1]) > 3) {
+		numGerEspLiv = atoi(word[1]);
+
+		if (numGerEspLiv < 1 || numGerEspLiv > 3) {
 			printf("Numero de gerenciamento de espaco livre invalido\n");
 		}
-		else {
-			numGerEspLiv = atoi(word[1]);
-		}
-		
 	}
 	else if (strcmp(word[0], "substitui") == 0) {
-		if(atoi(word[1]) < 1 || atoi(word[1]) > 4) {
+		numSubsPag = atoi(word[1]);
+		
+		if (numSubsPag < 1 || numSubsPag > 4) {
 			printf("Numero de substituicao de paginas invalido\n");
-		}
-		else {
-			numSubsPag = atoi(word[1]);
 		}
 	}
 	else if (strcmp(word[0], "executa") == 0) {
-	 	if(atof(word[1]) <= 0){
+		intervalo = atof(word[1]);
+
+	 	if (intervalo <= 0) {
 			printf("Intervalo de tempo invalido\n");
 		}
 		else {
-			intervalo = atof(word[1]);
-			
-			printf("Arquivo: %s\nGerencia Espaco Livre: %d\nSubstituicao Pagina: %d\nIntervalo: %f\n", 
-			"", numGerEspLiv, numSubsPag, intervalo);
-
-			simulador(numGerEspLiv);
+			if (numGerEspLiv && arqEntrada) {
+				printf("Arquivo: %s\nGerencia Espaco Livre: %d\nSubstituicao Pagina: %d\nIntervalo: %f\n", 
+				"", numGerEspLiv, numSubsPag, intervalo);
+				simulador(numGerEspLiv);
+			}
+			else {
+				printf("Faltou definir algum parâmetro!\n");
+			}
 		}
 	}
 	else if (strcmp(word[0], "sai") == 0) {
@@ -78,7 +79,7 @@ int interpretaComandosShell() {
 	return 1;
 }
 
-void limpaMatriz() {
+static void limpaMatriz() {
 	int i, j;
 
 	for (i = 0; i < LINMAX; i++) {
@@ -88,21 +89,21 @@ void limpaMatriz() {
 	}
 }
 
-void parserCommandShell(char *line) {
+static void parserCommandShell(char *line) {
 	int i, lin = 0, col = 0;
 
-	for(i = 0; line[i] != '\0'; i++) {
-		if(line[i] != ' ') {
+	for (i = 0; line[i] != '\0'; i++) {
+		if (line[i] != ' ') {
 			word[lin][col++] = line[i];
 		}
-		else if(col != 0) {
+		else if (col != 0) {
 			lin++;
 			col = 0;
 		}
 	}
 }
 
-void leArquivoEntrada() {
+static void leArquivoEntrada() {
 	int i = 0;
 
 	fscanf(arqEntrada,"%d %d", &memTotal, &memVirtual); 

@@ -54,7 +54,7 @@ int main(int argc, char* argv[]){
 	
 		printList();
 	}
-	else if(argc == 2 && atoi(argv[1]) == 2){
+	else if(argc == 2 && atoi(argv[1]) == 2) {
 		printf("Next Fit!!!\n");
 		
 		inicioNextFit = head->prox;
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]){
 
 		printList();
 	}
-	else{
+	else {
 		printf("Ta errado sua anta!!!\n");
 		exit(-1);
 	}
@@ -135,7 +135,7 @@ int insertProcess(Link aux, int tamanho) {
 	return 0;
 }
 
-void removeProcess(Link meio){
+void removeProcess(Link meio) {
 	Link esq = meio->ant;
  	Link dir = meio->prox;
 
