@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include "inicializacao.h"
+#include "memoryManager.h"
 
 struct timeval inicio;
 sem_t mutex;
@@ -55,13 +56,7 @@ void simulador(int numGerEspLiv){
 			exit(1);
         }
     }
-
-    printf("\n\nAgora vem a lista\n\n");
-    printList();
 }
-
-
-			
 
 void *Processo(void *a) {
 	int* id = (int*) a;
@@ -75,7 +70,7 @@ void *Processo(void *a) {
 
 	while(tempoDesdeInicio(inicio) < trace[pid].tf) usleep(50000);
 
-	if(pid != 5) removeProcess(trace[pid].myLink, pid);	//TODO: analisar esse caso
+	removeProcess(trace[pid].myLink, pid);	//TODO: remover se for inserido
 
 	return NULL;
 }
@@ -93,21 +88,6 @@ void parserArgumentosEntrada(int argc, char* argv[]) {
 	if(argc == 1) {
 		shell();
 	}
-
-	/*else if (argc == 5) {			
-		arqEntrada = fopen(argv[1], "r");
-		numGerEspLiv = atoi(argv[2]);
-		numSubsPag = atoi(argv[3]);
-		intervalo = atof(argv[4]);
-
-		if (!arqEntrada) {
-			fprintf(stderr, "ERRO ao abrir o arquivo %s\n", argv[2]);
-			exit(0);
-		}
-
-		printf("Arquivo: %s\nGerencia Espaco Livre: %d\nSubstituicao Pagina: %d\nIntervalo: %f\n", 
-			argv[1], numGerEspLiv, numSubsPag, intervalo);
-	} */
 	else {
 		printf("Formato esperado:\n./ep2\n");
 		exit(0);
@@ -124,40 +104,3 @@ float tempoDesdeInicio(struct timeval inicio) {
 
 	return timedif;
 }
-
-// void simulador(int numGerEspLiv){
-// 	initList(13);
-
-// 	/* inicializacao de um caso teste*/
-// 	firstFit(3);
-// 	firstFit(2);
-// 	firstFit(2);
-// 	firstFit(4);
-// 	firstFit(1);
-
-// 	removeProcess(head->prox->prox);
-// 	removeProcess(head->prox->prox->prox->prox);
-// 	printList();
-// 	******************************
-
-// 	if(numGerEspLiv == 1){
-// 		printf("First Fit!!!\n");
-
-// 		firstFit(3);
-// 		firstFit(1);
-// 		firstFit(1);
-	
-// 		printList();
-// 	}
-// 	else if(numGerEspLiv == 2){
-// 		printf("Next Fit!!!\n");
-		
-// 		inicioNextFit = head->prox;
-
-// 		nextFit(3);
-// 		nextFit(1);
-// 		nextFit(1);
-
-// 		printList();
-// 	}
-// }

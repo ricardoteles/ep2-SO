@@ -49,5 +49,7 @@ void removeProcess(Link meio, int pid){
 
 		removeList(meio, dir); 
 		removeList(esq, meio); 
-	} 
+	}
+
+	printList();	// TODO: isso serve para teste (apagar depois)
 }
