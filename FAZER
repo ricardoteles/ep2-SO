@@ -1,4 +1,4 @@
 - no comando CARREGA incluir o path absoluto do arquivo
 - ver o tempo (mudar ele de float para int?)
 - só remover o processo que foi inserido na memória
-- arrumar o next Fit, pois esta dando segmentation fault
+- arrumar o next Fit, pois esta dando segmentation fault  (OK)

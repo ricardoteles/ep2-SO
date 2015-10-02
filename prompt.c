@@ -30,6 +30,8 @@ void shell() {
 }
 
 static int interpretaComandosShell() {
+	int aux; 
+	
 	if (strcmp(word[0],"carrega") == 0) {
 		arqEntrada = fopen(word[1], "r");
 		leArquivoEntrada();
@@ -39,17 +41,23 @@ static int interpretaComandosShell() {
 		}
 	}
 	else if (strcmp(word[0],"espaco") == 0) {
-		numGerEspLiv = atoi(word[1]);
+		aux = atoi(word[1]);
 
-		if (numGerEspLiv < 1 || numGerEspLiv > 3) {
+		if (aux < 1 || aux > 3) {
 			printf("Numero de gerenciamento de espaco livre invalido\n");
+		}
+		else {
+			numGerEspLiv = aux; 
 		}
 	}
 	else if (strcmp(word[0], "substitui") == 0) {
-		numSubsPag = atoi(word[1]);
+		aux = atoi(word[1]);
 		
-		if (numSubsPag < 1 || numSubsPag > 4) {
+		if (aux < 1 || aux > 4) {
 			printf("Numero de substituicao de paginas invalido\n");
+		}
+		else {
+			numSubsPag = aux;
 		}
 	}
 	else if (strcmp(word[0], "executa") == 0) {

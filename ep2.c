@@ -64,7 +64,7 @@ void *Processo(void *a) {
 
 	sem_wait(&mutex);
 	printf("Ola eu sou a thread: %d\n", pid);
-	firstFit(trace[pid].b, pid);
+	nextFit(trace[pid].b, pid);
 	sem_post(&mutex);
 
 	while(tempoDesdeInicio(inicio) < trace[pid].tf) usleep(50000);

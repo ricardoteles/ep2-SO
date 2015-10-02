@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "process.h"
 #include "linkedList.h"
 #include "memoryManager.h"
@@ -13,10 +14,10 @@ void firstFit(int tamanho, int pid) {
 }
 
 void nextFit(int tamanho, int pid) {
-	static Link inicioNextFit = 0;
+	static Link inicioNextFit = NULL;
 	
-	if (inicioNextFit == 0) 
-		inicioNextFit = head->prox;
+	if (!inicioNextFit) 
+	 	inicioNextFit = head->prox;
 
 	Link aux = inicioNextFit;
 
