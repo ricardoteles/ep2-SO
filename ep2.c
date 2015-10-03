@@ -8,6 +8,8 @@
 struct timeval inicio;
 sem_t mutex;
 
+FILE *arqMem, *arqVir;  
+
 void simulador(int numGerEspLiv);
 void *Processo(void *a);
 int compare_arrive(const void *a,const void *b);

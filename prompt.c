@@ -11,6 +11,8 @@ static int interpretaComandosShell();
 static void limpaMatriz();
 static void parserCommandShell(char *line);
 static void leArquivoEntrada();
+static void criaArquivosMemoria();
+static void imprimeArquivos();
 
 FILE* arqEntrada = NULL;
 char word[LINMAX][COLMAX];
@@ -28,6 +30,59 @@ void shell() {
 		ret = interpretaComandosShell();
 	}
 }
+
+static void criaArquivosMemoria() {
+	FILE* arqMem = fopen("/tmp/ep2.mem", "a+b");
+	FILE* arqVir = fopen("/tmp/ep2.vir", "a+b");
+	
+	char val = -1;
+	int i;
+
+	if (!arqMem) {
+		fprintf(stderr, "ERRO ao abrir o arquivo /tmp/ep2.mem .\n");
+		exit(0);
+	}
+
+	if (!arqVir) {
+		fprintf(stderr, "ERRO ao abrir o arquivo /tmp/ep2.vir .\n");
+		exit(0);
+	}
+
+	for (i = 0; i < memTotal; i++)
+		fwrite(&val, sizeof(char), 1, arqMem); 
+
+	for (i = 0; i < memVirtual; i++)
+		fwrite(&val, sizeof(char), 1, arqVir);
+
+	fclose(arqMem);
+	fclose(arqVir);
+}
+ 
+static void imprimeArquivos() {
+	char val;
+	int i;
+
+	FILE* arqMem = fopen("/tmp/ep2.mem", "a+b");
+	FILE* arqVir = fopen("/tmp/ep2.vir", "a+b");
+
+	printf("Memoria real:\n");
+
+	for (i = 0; i < memTotal; i++) {
+		fread(&val, sizeof(char), 1, arqMem);
+		printf("%d ", val);
+	}
+	printf("\n");
+
+	for (i = 0; i < memVirtual; i++) {
+		fread(&val, sizeof(char), 1, arqMem);
+		printf("%d ", val);
+	}
+	printf("\n");
+
+	fclose(arqMem);
+	fclose(arqVir);
+}
+
 
 static int interpretaComandosShell() {
 	int aux; 
