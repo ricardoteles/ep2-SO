@@ -8,7 +8,7 @@ void firstFit(int tamanho, int pid) {
 
 	for(aux = head->prox; aux != tail; aux = aux->prox) {
 		if(aux->info == 'L') {
-			if(insertProcess(aux, tamanho, pid))	break;
+			if(insertProcess(aux, tamanho, pid)) break;
 		}
 	}
 }

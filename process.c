@@ -13,12 +13,12 @@ static void splitHoleInPL(Link aux, int tamanho) {
 int insertProcess(Link aux, int tamanho, int pid) {
 	if(aux->tamanho == tamanho) {
 		aux->info = 'P'; // ocupa toda lacuna
-		trace[pid].myLink = aux;
+		tabelaProcessos[pid].myLink = aux;
 		return 1;
 	}
 	else if(aux->tamanho > tamanho) {
 		splitHoleInPL(aux, tamanho);
-		trace[pid].myLink = aux;
+		tabelaProcessos[pid].myLink = aux;
 		return 1;
 	}
 
@@ -49,6 +49,4 @@ void removeProcess(Link meio, int pid){
 		removeItemList(meio, dir); 
 		removeItemList(esq, meio); 
 	}
-
-	printList();	// TODO: isso serve para teste (apagar depois)
 }

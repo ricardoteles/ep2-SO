@@ -87,7 +87,8 @@ static void imprimeArquivos() {
 static int interpretaComandosShell() {
 	int aux; 
 	
-	if (strcmp(word[0],"carrega") == 0) {
+	/*carrega*/
+	if (strcmp(word[0],"c") == 0) {
 		arqEntrada = fopen(word[1], "r");
 		leArquivoEntrada();
 
@@ -95,7 +96,8 @@ static int interpretaComandosShell() {
 			fprintf(stderr, "ERRO ao abrir o arquivo %s\n", word[1]);
 		}
 	}
-	else if (strcmp(word[0],"espaco") == 0) {
+	/*espaco*/
+	else if (strcmp(word[0],"e") == 0) {
 		aux = atoi(word[1]);
 
 		if (aux < 1 || aux > 3) {
@@ -105,7 +107,8 @@ static int interpretaComandosShell() {
 			numGerEspLiv = aux; 
 		}
 	}
-	else if (strcmp(word[0], "substitui") == 0) {
+	/*substitui*/
+	else if (strcmp(word[0], "s") == 0) {
 		aux = atoi(word[1]);
 		
 		if (aux < 1 || aux > 4) {
@@ -115,7 +118,8 @@ static int interpretaComandosShell() {
 			numSubsPag = aux;
 		}
 	}
-	else if (strcmp(word[0], "executa") == 0) {
+	/*executa*/
+	else if (strcmp(word[0], "x") == 0) {
 		intervalo = atof(word[1]);
 
 	 	if (intervalo <= 0) {
@@ -168,13 +172,65 @@ static void parserCommandShell(char *line) {
 
 static void leArquivoEntrada() {
 	int i = 0;
+	char *p, *t;
+	char line[100], *search = " ";
+	Node cauda = NULL;
+	// char c;
 
 	fscanf(arqEntrada,"%d %d", &memTotal, &memVirtual); 
 
-	while (fscanf(arqEntrada,"%d %s %d %d", &trace[i].t0, trace[i].nome, 
-		&trace[i].tf, &trace[i].b) != EOF) {		
+	while (fscanf(arqEntrada,"%d %s %d %d %[^\n]s", &tabelaProcessos[i].t0, tabelaProcessos[i].nome, 
+		&tabelaProcessos[i].tf, &tabelaProcessos[i].b, line) != EOF) {
+	
+		tabelaProcessos[i].listaTrace = iniciaLista();
+		cauda = tabelaProcessos[i].listaTrace;
+
+		p = strtok(line, search);
+		t = strtok(NULL, search);
+
+		while(p != NULL){
+			cauda = insertNodeList(cauda, atoi(p), atoi(t));
+			// printf("%d: %d %d\n", i, atoi(p), atoi(t));
+			p = strtok(NULL, search);
+			t = strtok(NULL, search);
+		}
+
+		// c = getchar();	
 		i++;
 	}
 
 	nProcs = i;
 }
+
+/*************** LISTA para os P's do arqEntrada **********************/
+
+Node iniciaLista() {
+	Node cab = mallocNodeList();
+	
+	cab->p = -1;
+	cab->t = -1;
+	cab->next = NULL;
+
+	return cab;	
+}
+
+Node insertNodeList(Node aux, int p, int t) {
+	Node novo = mallocNodeList();
+	novo->p = p;
+	novo->t = t;
+
+	novo->next = aux->next;
+	aux->next = novo;
+
+	return aux->next;
+}
+
+Node mallocNodeList() {
+	Node p = (Node) malloc(sizeof(Trace));
+	if (!p) {
+		fprintf(stderr, "Memoria insuficiente!\n");
+		exit(1);
+	}
+
+	return p;
+} 
