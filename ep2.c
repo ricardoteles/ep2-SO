@@ -8,12 +8,12 @@
 struct timeval inicio;
 
 FILE *arqMem, *arqVir;
-sem_t mutex, semThread[NMAX_PROCS], semLiberouEspaco;
+sem_t mutexPrint;
 int deadProcs = 0;
 
 void simulador(int numGerEspLiv);
 void *Debug(void *a);
-void *Processo(void *a);
+void *Gerenciador(void *a);
 void insereNaMemoriaVirtual(int tamanho, int pid);
 int compare_arrive(const void *a,const void *b);
 void parserArgumentosEntrada(int argc, char* argv[]);
@@ -29,47 +29,41 @@ int main(int argc, char* argv[]) {
 void simulador(int numGerEspLiv) {
 	initList(memVirtual);
 
-	pthread_t procs[NMAX_PROCS];
-	pthread_t debug;
-	int i, pos;
+	pthread_t debug, gerenciador;
+	int i;
 
 	qsort(tabelaProcessos, nProcs, sizeof(PROCESS), compare_arrive);
 	
-	for(pos = 0; pos < nProcs; pos++) {
-		tabelaProcessos[pos].pid = pos;	
+	for(i = 0; i < nProcs; i++) {
+		tabelaProcessos[i].pid = i;	
 	}
-
-	inicializaSemaforos();
 
 	if (pthread_create(&debug, NULL, Debug, (void *) NULL)) {
         printf("\n ERROR creating thread Debug\n");
         exit(1);
 	}
+	if (pthread_create(&gerenciador, NULL, Gerenciador, (void *) NULL)) {
+        printf("\n ERROR creating thread Debug\n");
+        exit(1);
+	}
 
+	inicializaSemaforos();
 
 	gettimeofday(&inicio, NULL);
 	
 	for (i = 0; i < nProcs; i++) {
 		while (tempoDesdeInicio(inicio) < tabelaProcessos[i].t0) usleep(50000);
 		
-		if (pthread_create(&procs[i], NULL, Processo, (void *) &tabelaProcessos[i].pid)) {
-            printf("\n ERROR creating thread procs[%d]\n", i);
-            exit(1);
-        }
-
         insereNaMemoriaVirtual(tabelaProcessos[i].b, tabelaProcessos[i].pid);
-        sem_post(&semThread[tabelaProcessos[i].pid]);
+        // insereNoArquivo ep2.vir
 	}
 
-	for (i = 0; i < nProcs; i++) {
-        if (pthread_join(procs[i], NULL)) {
-			printf("\n ERROR joining thread procs[%d]\n", i);
-			exit(1);
-        }
+	if (pthread_join(gerenciador, NULL)) {
+		printf("\n ERROR joining thread gerenciador\n", i);
+		exit(1);
     }
-
     if (pthread_join(debug, NULL)) {
-		printf("\n ERROR joining thread procs[%d]\n", i);
+		printf("\n ERROR joining thread debug\n", i);
 		exit(1);
     }
 }
@@ -98,42 +92,45 @@ void *Debug(void *a) {
 		while ((wait = tempoDesdeInicio(inicioDebug)) < intervalo) 
 			usleep(10000);
 
-		sem_wait(&mutex);
+		sem_wait(&mutexPrint);
 		printf("\n--------------------- Status da memoria: ---------------------\n");
 		// imprimeMemoria();
 		printList();
 		printf("\n--------------------------------------------------------------\n");
-		sem_post(&mutex);
+		sem_post(&mutexPrint);
 	}
 }
 
-void *Processo(void *a) {
-	int* id = (int*) a;
-	int pid = (*id);
-	Node aux = tabelaProcessos[pid].listaTrace->next;
+void *Gerenciador(void *a) {
+	int i;
+	Node aux[nProcs];
+	int acabou[nProcs];
 
-	sem_wait(&semThread[pid]);
-
-	while (tempoDesdeInicio(inicio) < tabelaProcessos[pid].tf){
-		if(aux == NULL){
-			while (tempoDesdeInicio(inicio) < tabelaProcessos[pid].tf) usleep(50000);
-			break;
-		}
-
-		while (tempoDesdeInicio(inicio) < aux->t) usleep(50000);
-	
-		// sem_wait(&mutex);
-		// printf("Eu sou o %s. p = %d t = %f \n", tabelaProcessos[pid].nome, aux->p, tempoDesdeInicio(inicio));
-		// sem_post(&mutex);
-	
-		aux = aux->next;
+	for(i = 0; i < nProcs; i++){
+		aux[i] = tabelaProcessos[i].listaTrace->next;
+		acabou[i] = 0;
 	}
 	
-	// printf("Eu sou o %s.	tf = %f (ACABEI)\n", tabelaProcessos[pid].nome, tempoDesdeInicio(inicio));
+	while(deadProcs < nProcs){
+		for(i = 0; i < nProcs; i++){			
+			if(tempoDesdeInicio(inicio) >= tabelaProcessos[i].tf && !acabou[i]){
+				printf("Tempo = %f  %s (TERMINOU)\n", tempoDesdeInicio(inicio), tabelaProcessos[i].nome);
+				acabou[i] = 1;
+				deadProcs++;
+				break;
+			}
 
-	sem_wait(&mutex);
-	deadProcs++;
-	sem_post(&mutex);
+			if(aux[i] != NULL){
+				if (tempoDesdeInicio(inicio) >= aux[i]->t){ 
+					printf("Tempo = %f 	parte %d (%s)\n", tempoDesdeInicio(inicio), aux[i]->p, tabelaProcessos[i].nome);
+					// insereNaMemoriaFisica();
+					//insereNoArquivo ep2.mem
+					aux[i] = aux[i]->next;
+				}
+			}
+		}
+		usleep(200000);
+	}
 
 	return NULL;
 }
@@ -171,20 +168,8 @@ float tempoDesdeInicio(struct timeval inicio) {
 void inicializaSemaforos() {
 	int i;
 
-	if (sem_init(&mutex, 0, 1)) {
-		fprintf(stderr, "ERRO ao criar semaforo mutex\n");
+	if (sem_init(&mutexPrint, 0, 1)) {
+		fprintf(stderr, "ERRO ao criar semaforo mutexPrint\n");
 		exit(0);
-	}
-
-	if (sem_init(&semLiberouEspaco, 0, 0)) {
-		fprintf(stderr, "ERRO ao criar semaforo semLiberouEspaco\n");
-		exit(0);
-	}
-
-	for (i = 0; i < NMAX_PROCS; i++) {
-		if (sem_init(&semThread[i], 0, 0)) {
-			fprintf(stderr, "ERRO ao criar semaforo semThread[%d]\n", i);
-			exit(0);
-		}
 	}
 }
