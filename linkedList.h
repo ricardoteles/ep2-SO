@@ -3,8 +3,8 @@
 
 typedef struct segmento* Link;
 
-struct segmento{
-	char info;
+typedef struct segmento {
+	char info;    // L ou P
 	int base;
 	int tamanho;
 	Link prox;
@@ -14,8 +14,9 @@ struct segmento{
 Link head, tail;
 
 void initList(int totalMemoria);
-void insertItemList(Link aux, char info, int base, int tamanho);
-void removeItemList(Link aux, Link rem);
+void freeList();
+void insertItemList(Link anterior, char info, int base, int tamanho);
+void removeItemList(Link removido);
 void printList();
 Link mallocItemList();
 

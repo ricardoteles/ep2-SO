@@ -25,6 +25,7 @@ void removeItemList(Link aux, Link rem);
 void printList();
 Link mallocItemList();
 
+void *Processo(void *a);
 int insertProcess(Link aux, int tamanho);
 void removeProcess(Link aux);
 
@@ -210,4 +211,37 @@ Link mallocItemList() {
 	}
 
 	return p;
+}
+
+
+// modelo de processo abandonado 
+void *Processo(void *a) {
+	int* id = (int*) a;
+	int pid = (*id);
+	Node aux = tabelaProcessos[pid].listaTrace->next;
+
+	sem_wait(&semThread[pid]);
+
+	while (tempoDesdeInicio(inicioProg) < tabelaProcessos[pid].tf){
+		if(aux == NULL){
+			while (tempoDesdeInicio(inicioProg) < tabelaProcessos[pid].tf) usleep(50000);
+			break;
+		}
+
+		while (tempoDesdeInicio(inicioProg) < aux->t) usleep(50000);
+	
+		// sem_wait(&mutex);
+		// printf("Eu sou o %s. p = %d t = %f \n", tabelaProcessos[pid].nome, aux->p, tempoDesdeInicio(inicioProg));
+		// sem_post(&mutex);
+	
+		aux = aux->next;
+	}
+	
+	// printf("Eu sou o %s.	tf = %f (ACABEI)\n", tabelaProcessos[pid].nome, tempoDesdeInicio(inicioProg));
+
+	sem_wait(&mutex);
+	deadProcs++;
+	sem_post(&mutex);
+
+	return NULL;
 }

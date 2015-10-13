@@ -8,7 +8,7 @@ void initList(int totalMemoria) {
 	
 	head->info = 'P';
 	head->base = -1;
-	head->tamanho = -1;	
+	head->tamanho = -1;
 	head->ant = NULL;
 	head->prox = tail;
 	
@@ -18,39 +18,46 @@ void initList(int totalMemoria) {
 	tail->ant = head;
 	tail->prox = NULL;
 
-	insertItemList(head, 'L', 0, totalMemoria);	
+	insertItemList(head, 'L', 0, totalMemoria);
 }
 
-void insertItemList(Link aux, char info, int base, int tamanho) {
+void freeList() {
+	free(tail);
+	free(head);
+	tail = NULL;
+	head = NULL;
+}
+
+void insertItemList(Link anterior, char info, int base, int tamanho) {
 	Link novo = mallocItemList();
 	novo->info = info;
 	novo->base = base;
 	novo->tamanho = tamanho;
 
-	novo->prox = aux->prox;
-	aux->prox->ant = novo;
-	aux->prox = novo;
-	novo->ant = aux;
+	novo->prox = anterior->prox;
+	anterior->prox->ant = novo;
+	anterior->prox = novo;
+	novo->ant = anterior;
 }
 
-void removeItemList(Link aux, Link rem) {
-	aux->prox = rem->prox;
-	rem->prox->ant = aux;
+void removeItemList(Link removido) {
+	Link aux = removido->ant;
 
-	rem->prox = NULL;
-	rem->ant = NULL;
+	aux->prox = removido->prox;
+	removido->prox->ant = aux;
 
-	free(rem); 
+	free(removido); 
+	removido = NULL;
 }
 
 void printList() {
 	Link aux;
 
-	printf("Lista: \n");
+	printf("HEAD: \n");
 	for(aux = head->prox; aux != tail; aux = aux->prox) {
 		printf("%c %d %d\n", aux->info, aux->base, aux->tamanho);
 	}
-	printf("FIM\n\n");
+	printf("TAIL\n\n");
 }
 
 Link mallocItemList() {

@@ -1,175 +1,238 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include "prompt.h"
-#include "memoryManager.h"
+#include <string.h>
+#include <stdio.h>
+#include <readline/readline.h>
+#include "simulador.h"
 
-struct timeval inicio;
+#define LINMAX 10
+#define COLMAX 50
 
-FILE *arqMem, *arqVir;
-sem_t mutexPrint;
-int deadProcs = 0;
+FILE* arqEntrada;
+char word[LINMAX][COLMAX];
+static Process myTable[NMAX_PROCS];
 
-void simulador(int numGerEspLiv);
-void *Debug(void *a);
-void *Gerenciador(void *a);
-void insereNaMemoriaVirtual(int tamanho, int pid);
-int compare_arrive(const void *a,const void *b);
-void parserArgumentosEntrada(int argc, char* argv[]);
-float tempoDesdeInicio();
-void inicializaSemaforos();
+/*================================= PROTOTIPOS ========================================*/
+int interpretaComandosShell();
+void limpaMatriz();
+void parserCommandShell(char *line);
+void leArquivoEntrada();
+void criaArquivosMemoria();
+void imprimeArquivos();
 
-int main(int argc, char* argv[]) {
-	parserArgumentosEntrada(argc, argv);
+/*************** LISTA para os (pi,ti) do arqEntrada **********************/
+Node initNodeList();
+Node insertNodeList(Node ant, int p, int t);
+void removeNodeList(Node cab);
+int emptyNodeList(Node cab);
+Node mallocNodeList();
+void freeNodeList(Node cab);
+/*=====================================================================================*/
+
+int main() {
+	int status = 1;
+	char* line;
+	printf("\n--------------------- SHELL EP2 ---------------------\n\n");
+
+	while (status) {
+		line = readline("[ep2]: ");
+		limpaMatriz();
+		parserCommandShell(line);
+		status = interpretaComandosShell();
+
+		if (word[0][0] != '\0')
+			add_history (line);
+	}
 
 	return 0;
 }
 
-void simulador(int numGerEspLiv) {
-	initList(memVirtual);
-
-	pthread_t debug, gerenciador;
-	int i;
-
-	qsort(tabelaProcessos, nProcs, sizeof(PROCESS), compare_arrive);
+int interpretaComandosShell() {
+	int aux, i;
 	
-	for(i = 0; i < nProcs; i++) {
-		tabelaProcessos[i].pid = i;	
+	/*carrega*/
+	if (strcmp(word[0], "c") == 0) {
+		arqEntrada = fopen(word[1], "r");
+
+		if (!arqEntrada) {
+			fprintf(stderr, "ERRO ao abrir o arquivo %s\n", word[1]);
+		}
+
+		leArquivoEntrada();
 	}
 
-	if (pthread_create(&debug, NULL, Debug, (void *) NULL)) {
-        printf("\n ERROR creating thread Debug\n");
-        exit(1);
-	}
-	if (pthread_create(&gerenciador, NULL, Gerenciador, (void *) NULL)) {
-        printf("\n ERROR creating thread Debug\n");
-        exit(1);
+	/*espaco*/
+	else if (strcmp(word[0], "e") == 0) {
+		aux = atoi(word[1]);
+
+		if (aux < 1 || aux > 3) {
+			printf("Numero de gerenciamento de espaco livre invalido\n");
+		}
+		else {
+			numGerEspLiv = aux; 
+		}
 	}
 
-	inicializaSemaforos();
-
-	gettimeofday(&inicio, NULL);
-	
-	for (i = 0; i < nProcs; i++) {
-		while (tempoDesdeInicio(inicio) < tabelaProcessos[i].t0) usleep(50000);
+	/*substitui*/
+	else if (strcmp(word[0], "s") == 0) {
+		aux = atoi(word[1]);
 		
-        insereNaMemoriaVirtual(tabelaProcessos[i].b, tabelaProcessos[i].pid);
-        // insereNoArquivo ep2.vir
+		if (aux < 1 || aux > 4) {
+			printf("Numero de substituicao de paginas invalido\n");
+		}
+		else {
+			numSubsPag = aux;
+		}
 	}
 
-	if (pthread_join(gerenciador, NULL)) {
-		printf("\n ERROR joining thread gerenciador\n", i);
-		exit(1);
-    }
-    if (pthread_join(debug, NULL)) {
-		printf("\n ERROR joining thread debug\n", i);
-		exit(1);
-    }
-}
+	/* executa */
+	else if (strcmp(word[0], "x") == 0) {
+		intervalo = atof(word[1]);
 
-void insereNaMemoriaVirtual(int tamanho, int pid) {
-	switch(numGerEspLiv){
-		case 1: firstFit(tamanho, pid);
-				break;
-		
-		case 2:	nextFit(tamanho, pid);
-				break;
-
-		case 3:	/*quickFit(tamanho, pid);*/
-				break;
-	}
-}
-
-void *Debug(void *a) {
-	float wait;
-	struct timeval inicioDebug;
-
-	while (deadProcs < nProcs) {
-		gettimeofday(&inicioDebug, NULL);
-
-		// (int)(intervalo-wait)*1000000 ?
-		while ((wait = tempoDesdeInicio(inicioDebug)) < intervalo) 
-			usleep(10000);
-
-		sem_wait(&mutexPrint);
-		printf("\n--------------------- Status da memoria: ---------------------\n");
-		// imprimeMemoria();
-		printList();
-		printf("\n--------------------------------------------------------------\n");
-		sem_post(&mutexPrint);
-	}
-}
-
-void *Gerenciador(void *a) {
-	int i;
-	Node aux[nProcs];
-	int acabou[nProcs];
-
-	for(i = 0; i < nProcs; i++){
-		aux[i] = tabelaProcessos[i].listaTrace->next;
-		acabou[i] = 0;
-	}
-	
-	while(deadProcs < nProcs){
-		for(i = 0; i < nProcs; i++){			
-			if(tempoDesdeInicio(inicio) >= tabelaProcessos[i].tf && !acabou[i]){
-				printf("Tempo = %f  %s (TERMINOU)\n", tempoDesdeInicio(inicio), tabelaProcessos[i].nome);
-				acabou[i] = 1;
-				deadProcs++;
-				break;
-			}
-
-			if(aux[i] != NULL){
-				if (tempoDesdeInicio(inicio) >= aux[i]->t){ 
-					printf("Tempo = %f 	parte %d (%s)\n", tempoDesdeInicio(inicio), aux[i]->p, tabelaProcessos[i].nome);
-					// insereNaMemoriaFisica();
-					//insereNoArquivo ep2.mem
-					aux[i] = aux[i]->next;
+	 	if (intervalo <= 0) {
+			printf("Intervalo de tempo invalido\n");
+		}
+		else {
+			if (numGerEspLiv && arqEntrada) {
+				
+				for (i = 0; i < nProcs; i++) {
+					tabelaProcessos[i] = myTable[i];
 				}
+
+				simulador();
+			}
+			else {
+				printf("Faltou definir algum parâmetro!\n");
 			}
 		}
-		usleep(200000);
 	}
 
-	return NULL;
-}
-
-int compare_arrive(const void *a,const void *b) {
-	PROCESS *x = (PROCESS *) a;
-	PROCESS *y = (PROCESS *) b;
-
-	if (x->t0 < y->t0) return -1;
-	else if (x->t0 > y->t0) return 1;
-	else return 0;
-}
-
-void parserArgumentosEntrada(int argc, char* argv[]) {
-	if(argc == 1) {
-		shell();
+	else if (strcmp(word[0], "sai") == 0) {
+		return 0;		
 	}
-	else {
-		printf("Formato esperado:\n./ep2\n");
+	
+	else if (word[0][0] != '\0'){
+		fprintf(stderr, "comando %s inválido!\n", word[0]);
+	}
+
+	return 1;
+}
+
+void limpaMatriz() {
+	int i, j;
+
+	for (i = 0; i < LINMAX; i++) {
+		for (j = 0; j < COLMAX; j++) {
+			word[i][j] = 0;
+		}
+	}
+}
+
+void parserCommandShell(char *line) {
+	int i, lin = 0, col = 0;
+
+	for (i = 0; line[i] != '\0'; i++) {
+		if (line[i] != ' ') {
+			word[lin][col++] = line[i];
+		}
+		else if (col != 0) {
+			lin++;
+			col = 0;
+		}
+	}
+}
+
+void leArquivoEntrada() {
+	int i = 0;
+	char *p, *t;
+	char line[100], *search = " ";
+	Node cauda;
+	// char c;
+
+	fscanf(arqEntrada,"%d %d", &memTotal, &memVirtual); 
+
+	while (fscanf(arqEntrada,"%d %s %d %d %[^\n]s", &tabelaProcessos[i].t0, tabelaProcessos[i].nome, 
+		&tabelaProcessos[i].tf, &tabelaProcessos[i].b, line) != EOF) {
+	
+		tabelaProcessos[i].listaTrace = initNodeList();
+		cauda = tabelaProcessos[i].listaTrace;
+		cauda = insertNodeList(cauda, -1, tabelaProcessos[i].t0);
+
+		p = strtok(line, search);
+		t = strtok(NULL, search);
+
+		while (p != NULL) {
+			cauda = insertNodeList(cauda, atoi(p), atoi(t));
+			// printf("%d: %d %d\n", i, atoi(p), atoi(t));
+			p = strtok(NULL, search);
+			t = strtok(NULL, search);
+		}
+
+		cauda = insertNodeList(cauda, -1, tabelaProcessos[i].tf);
+
+		// c = getchar();	
+		i++;
+	}
+
+	nProcs = i;
+	fclose(arqEntrada);
+	
+	for (i = 0; i < nProcs; i++) {
+		myTable[i] = tabelaProcessos[i];
+	}
+
+	if (nProcs > NMAX_PROCS) {
+		printf("# MAX de traces permitidos: 256.\n");
+		arqEntrada = NULL;
+		return ;
+	}
+}
+
+/*************** LISTA para os P's do arqEntrada **********************/
+
+Node initNodeList() {
+	Node cab = mallocNodeList();
+	
+	cab->p = -1;
+	cab->t = -1;
+	cab->next = NULL;
+
+	return cab;	
+}
+
+Node insertNodeList(Node ant, int p, int t) {
+	Node novo = mallocNodeList();
+	novo->p = p;
+	novo->t = t;
+
+	//novo->next = aux->next;
+	novo->next = NULL;
+	ant->next = novo;
+
+	return novo;
+}
+
+void removeNodeList(Node cab) {	
+	if (!emptyNodeList(cab)) {
+		Node removido = cab->next;
+		cab->next = removido->next;
+		free(removido);
+		removido = NULL;
+	} else {
+		printf("Não era pra estar vazia a lista!\n");
 		exit(0);
 	}
 }
 
-float tempoDesdeInicio(struct timeval inicio) {
-	struct timeval fim;
-	float timedif;
-
-	gettimeofday(&fim, NULL);
-	timedif = (float)(fim.tv_sec - inicio.tv_sec);
-	timedif += (float)(fim.tv_usec - inicio.tv_usec)/1000000;
-
-	return timedif;
+int emptyNodeList(Node cab) {
+	return cab->next == NULL;
 }
 
-void inicializaSemaforos() {
-	int i;
-
-	if (sem_init(&mutexPrint, 0, 1)) {
-		fprintf(stderr, "ERRO ao criar semaforo mutexPrint\n");
-		exit(0);
+Node mallocNodeList() {
+	Node p = (Node) malloc(sizeof(Position));
+	if (!p) {
+		fprintf(stderr, "Memoria insuficiente!\n");
+		exit(1);
 	}
-}
+
+	return p;
+} 

@@ -1,8 +1,8 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-void imprimeMemoria();
-void escreveNaMemoria(int offset, int valor, int n);
-void inicializaMemoria(int val);
+void imprimeMemoriaVirtual();
+void escreveNaMemoriaVirtual(char pid, int inicio, int nbytes);
+void inicializaMemoriaVirtual(int totalMemoria);
 
 #endif

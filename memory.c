@@ -2,18 +2,16 @@
 #include <stdlib.h>
 #include "memory.h"
 
-#define MAX 15
+static FILE* arq;
 
-FILE* arq;
-
-void imprimeMemoria() {
-	int val, i;
+void imprimeMemoriaVirtual() {
+	char val, i;
 	arq = fopen("/tmp/ep2.vir", "rb");
 	
 	printf("Memoria Virtual:\n");
 
 	while (!feof(arq)) {
-		if (fread(&val, sizeof(int), 1, arq) == 1) {
+		if (fread(&val, sizeof(char), 1, arq) == 1) {
 			printf("%d ", val);
 		}
 	}
@@ -21,37 +19,31 @@ void imprimeMemoria() {
 	printf("\n");
 
 	fclose(arq);
-
 }
 
-void escreveNaMemoria(int offset, int valor, int n) {
+void escreveNaMemoriaVirtual(char pid, int inicio, int nbytes) {
 	int i;
-	int v[MAX];
+	char myPID = pid;
 
 	arq = fopen("/tmp/ep2.vir", "r+b");  
 	
-	for (i = 0; i < n; i++)
-		v[i] = valor;
+	fseek(arq, inicio * sizeof(char), SEEK_SET);	
 	
-	fseek(arq, offset * sizeof(int), SEEK_SET);	
-	
-	if (fwrite(v, sizeof(int), n, arq) != n) 
-		printf("Não escreveu %d itens!\n", n);
+	for (i = 0; i < nbytes; i++)
+		if (fwrite(&myPID, sizeof(char), 1, arq) != 1) 
+			printf("Não escreveu 1 byte!\n");
 
 	fclose(arq);
 }
 
-void inicializaMemoria(int val) {
-	 int v[MAX];
-	 int i;
+void inicializaMemoriaVirtual(int totalMemoria) {
+	int i;
+	char valor = -1;
+	arq = fopen("/tmp/ep2.vir", "wb");
 
-	arq = fopen("/tmp/ep2.vir", "wb");  
-	 
-	for (i = 0; i < MAX; i++)
-		v[i] = val;
-
-	if (fwrite(v, sizeof(int), MAX, arq) != MAX)
-		printf("Não escreveu %d itens!\n", MAX);
+	for (i = 0; i < totalMemoria; i++)
+		if (fwrite(&valor, sizeof(char), 1, arq) != 1)
+			printf("Não escreveu 1 byte ao inicializar!\n");
 
 	fclose(arq);
 }
