@@ -12,6 +12,7 @@ char word[LINMAX][COLMAX];
 static Process myTable[NMAX_PROCS];
 
 /*================================= PROTOTIPOS ========================================*/
+static void copiaLinhaTabela(int linha, Process t1[NMAX_PROCS], Process t2[NMAX_PROCS]);
 int interpretaComandosShell();
 void limpaMatriz();
 void parserCommandShell(char *line);
@@ -79,15 +80,23 @@ int interpretaComandosShell() {
 	/* executa */
 	else if (strcmp(word[0], "x") == 0) {
 		intervalo = atof(word[1]);
+		int i;
 
 	 	if (intervalo <= 0) {
 			printf("Intervalo de tempo invalido\n");
 		}
 		else {
-			if (numGerEspLiv && arqEntrada) {
+			if (numGerEspLiv && numSubsPag && arqEntrada) {
+				for(i = 0; i < (memVirtual/16); i++){
+					pagina[i] = -1;
+				}
+				
+				for(i = 0; i < (memTotal/16); i++){
+					quadrosUsados[i] = 0;
+				}
 				
 				for (i = 0; i < nProcs; i++) {
-					tabelaProcessos[i] = myTable[i];
+					copiaLinhaTabela(i, tabelaProcessos, myTable);
 				}
 
 				simulador();
@@ -161,16 +170,12 @@ void leArquivoEntrada() {
 
 		cauda = insertNodeList(cauda, -1, tabelaProcessos[i].tf);
 
-		// c = getchar();	
+		copiaLinhaTabela(i, myTable, tabelaProcessos);
 		i++;
 	}
 
 	nProcs = i;
 	fclose(arqEntrada);
-	
-	for (i = 0; i < nProcs; i++) {
-		myTable[i] = tabelaProcessos[i];
-	}
 
 	if (nProcs > NMAX_PROCS) {
 		printf("# MAX de traces permitidos: 256.\n");
@@ -179,15 +184,20 @@ void leArquivoEntrada() {
 	}
 
 	pagina = (int*)Malloc((memVirtual/16)*sizeof(int));
-
-	for(i = 0; i < (memVirtual/16); i++){
-		pagina[i] = -1;
-	}
-
 	quadrosUsados = (int*)Malloc((memTotal/16)*sizeof(int));
+}
 
-	for(i = 0; i < (memTotal/16); i++){
-		quadrosUsados[i] = 0;
+static void copiaLinhaTabela(int linha, Process t1[NMAX_PROCS], Process t2[NMAX_PROCS]) {
+	Node cauda, aux;
+
+	strcpy(t1[linha].nome, t2[linha].nome);
+	t1[linha].t0 = t2[linha].t0;
+	t1[linha].tf = t2[linha].tf;
+	t1[linha].b = t2[linha].b;
+
+	t1[linha].listaTrace = cauda = initNodeList();
+
+	for (aux = t2[linha].listaTrace->next; aux != NULL; aux = aux->next) {
+		cauda = insertNodeList(cauda, aux->p, aux->t);
 	}
-
 }

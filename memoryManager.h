@@ -1,7 +1,8 @@
 #ifndef MEMORYMANAGER_H 
 #define MEMORYMANAGER_H
 
-void firstFit(int tamanho, int pid);
-void nextFit(int tamanho, int pid);
+void firstFit(Link head, int tamanho, int pid);
+void nextFit(Link head, int tamanho, int pid);
+void quickFit(int tamanho, int pid);
 
 #endif

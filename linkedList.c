@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void initList(int totalMemoria) {
-	head = mallocItemList();
-	tail = mallocItemList();
+Link initList(int totalMemoria) {
+	Link head = mallocItemList();
+	Link tail = mallocItemList();
 	
 	head->info = 'P';
 	head->base = -1;
@@ -19,14 +19,16 @@ void initList(int totalMemoria) {
 	tail->prox = NULL;
 
 	insertItemList(head, 'L', 0, totalMemoria);
+
+	return head;
 }
 
-void freeList() {
-	free(tail);
-	free(head);
-	tail = NULL;
-	head = NULL;
-}
+// void freeList() {
+// 	free(tail);
+// 	free(head);
+// 	tail = NULL;
+// 	head = NULL;
+// }
 
 void insertItemList(Link anterior, char info, int base, int tamanho) {
 	Link novo = mallocItemList();
@@ -50,11 +52,11 @@ void removeItemList(Link removido) {
 	removido = NULL;
 }
 
-void printList() {
+void printList(Link head) {
 	Link aux;
 
 	printf("HEAD: \n");
-	for(aux = head->prox; aux != tail; aux = aux->prox) {
+	for(aux = head->prox; aux->prox != NULL; aux = aux->prox) {
 		printf("%c %d %d\n", aux->info, aux->base, aux->tamanho);
 	}
 	printf("TAIL\n\n");

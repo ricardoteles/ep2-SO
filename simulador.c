@@ -8,6 +8,7 @@
 struct timeval inicio;
 sem_t mutexPrint;
 int deadProcs;
+Link head;  // mem. virtual
 
 static void alocaEspacoLivre(int tamanho, int pid);
 static int compare_arrive(const void *a, const void *b);
@@ -23,7 +24,7 @@ void simulador() {
 	int i, pid, resto;
 	inicializaGlobais();
 	inicializaMemoriaVirtual(memVirtual);
-	initList(memVirtual/16);
+	head = initList(memVirtual/16);
 
 	pthread_t debug, gerenciador;
 
@@ -64,7 +65,7 @@ void simulador() {
 		exit(1);	
 	}
 
-	freeList();
+	//freeList();
 }
 
 void *Gerenciador(void *a) {
@@ -167,13 +168,13 @@ static void inicializaGlobais() {
 
 void alocaEspacoLivre(int tamanho, int pid) {
 	switch(numGerEspLiv) {
-		case 1: firstFit(tamanho, pid);
+		case 1: firstFit(head, tamanho, pid);
 				break;
 		
-		case 2:	nextFit(tamanho, pid);
+		case 2:	nextFit(head, tamanho, pid);
 				break;
 
-		case 3:	/*quickFit(tamanho, pid);*/
+		case 3:	quickFit(tamanho, pid);
 				break;
 	}
 }
@@ -191,7 +192,7 @@ void *Debug(void *a) {
 
 		sem_wait(&mutexPrint);
 		printf("\n--------------------- Status da memoria: ---------------------\n");
-		printList();
+		printList(head);
 		imprimeMemoriaVirtual();
 		printf("\n--------------------------------------------------------------\n");
 		sem_post(&mutexPrint);
@@ -244,8 +245,6 @@ Node insertNodeList(Node ant, int p, int t) {
 	Node novo = Malloc(sizeof(*novo));
 	novo->p = p;
 	novo->t = t;
-
-	//novo->next = aux->next;
 	novo->next = NULL;
 	ant->next = novo;
 
