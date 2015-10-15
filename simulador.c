@@ -72,6 +72,7 @@ void *Gerenciador(void *a) {
 	int i;
 	Node cab;
 	Node removido;
+	initQueue();
 
 	struct timeval inicio = *((struct timeval*) a);
 
