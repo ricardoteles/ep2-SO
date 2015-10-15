@@ -1,6 +1,7 @@
 #ifndef SIMULADOR_H
 #define SIMULADOR_H
 
+#include <stdlib.h>
 #include "linkedList.h"
 
 #define NMAX_PROCS 256  /* numero maximo de processos permitidos (1 BYTE) */
@@ -29,6 +30,18 @@ int numGerEspLiv, numSubsPag;
 float intervalo;
 int nProcs;
 
+int *pagina;
+int *quadrosUsados;
+
+/*************** LISTA para os (pi,ti) do arqEntrada **********************/
+Node initNodeList();
+Node insertNodeList(Node ant, int p, int t);
+Node removeNodeList(Node cab);
+int emptyNodeList(Node cab);
+void freeNodeList(Node cab);
+/*=====================================================================================*/
+
 void simulador();
+void* Malloc(size_t bytes);
 
 #endif

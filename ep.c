@@ -27,20 +27,16 @@ void NRU();
 int main(int argc, char* argv[]){
 	initList();
 
+	insertItemList(tail, 0, 0);
 	insertItemList(tail, 1, 0);
 	insertItemList(tail, 2, 0);
-	insertItemList(tail, 3, 0);
-	insertItemList(tail, 4, 0);
+	
+	printList();
+
+	substPagina(2, 0);
 
 	printList();
 
-	substPagina(2, 5);
-
-	printList();
-
-	substPagina(2, 6);
-
-	printList();
 	/********************************/
 
 

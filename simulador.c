@@ -1,9 +1,9 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include "simulador.h"
 #include "memoryManager.h"
+#include "paginacao.h"
 
 struct timeval inicio;
 sem_t mutexPrint;
@@ -12,7 +12,6 @@ int deadProcs;
 static void alocaEspacoLivre(int tamanho, int pid);
 static int compare_arrive(const void *a, const void *b);
 static float tempoDesdeInicio();
-static void* Malloc(size_t bytes);
 static void inicializaGlobais();
 
 void *Debug(void *a);
@@ -40,11 +39,11 @@ void simulador() {
 			tabelaProcessos[i].nbytes += (16 - resto);
 	}
 
-	printf("nProcs = %d\n", nProcs);
-	if (pthread_create(&debug, NULL, Debug, (void *) NULL)) {
-        printf("\n ERROR creating thread debug.\n");
-        exit(1);
-	}
+	// printf("nProcs = %d\n", nProcs);
+	// if (pthread_create(&debug, NULL, Debug, (void *) NULL)) {
+ //        printf("\n ERROR creating thread debug.\n");
+ //        exit(1);
+	// }
 	if (pthread_create(&gerenciador, NULL, Gerenciador, (void *) &inicio)) {
         printf("\n ERROR creating thread Debug\n");
         exit(1);
@@ -55,10 +54,10 @@ void simulador() {
 		exit(1);
     }
 
-    if (pthread_join(debug, NULL)) {
-		printf("\n ERROR joining thread debug\n");
-		exit(1);
-	}
+ //    if (pthread_join(debug, NULL)) {
+	// 	printf("\n ERROR joining thread debug\n");
+	// 	exit(1);
+	// }
 
 	if (sem_destroy(&mutexPrint) != 0) {
 		printf("\n ERROR destroying mutexPrint\n");
@@ -72,6 +71,7 @@ void *Gerenciador(void *a) {
 	int menorTempoProx, pidDoMenor;
 	int i;
 	Node cab;
+	Node removido;
 
 	struct timeval inicio = *((struct timeval*) a);
 
@@ -103,8 +103,8 @@ void *Gerenciador(void *a) {
 			usleep(500000);
 		
 		cab = tabelaProcessos[pidDoMenor].listaTrace;
-		removeNodeList(cab);
-		
+		removido = removeNodeList(cab);
+			
 		// alocação do processo
 		if (tabelaProcessos[pidDoMenor].start == 0) {
 			tabelaProcessos[pidDoMenor].start = 1;
@@ -117,7 +117,7 @@ void *Gerenciador(void *a) {
 
 	    	// ja precisa ter o link definido após alocação 
 			inicio = tabelaProcessos[pidDoMenor].myLink->base;
-	        escreveNaMemoriaVirtual((char) pidDoMenor, inicio * 16, nbytes);
+	        escreveNoArquivoVirtual((char) pidDoMenor, inicio * 16, nbytes);
 			
 			sem_wait(&mutexPrint);
 			printf("[PROCESSO %d ALOCADO].\n", pidDoMenor);
@@ -126,8 +126,11 @@ void *Gerenciador(void *a) {
 
 		// acesso a posicao (pagina)
 		else if (!emptyNodeList(cab)) {
+			// escreveNoArquivoReal();
+			alocaQuadro(tabelaProcessos[pidDoMenor].myLink, removido->p);
+
 			sem_wait(&mutexPrint);
-			printf("[PROCESSO %d ACESSOU POSICAO %d].\n", pidDoMenor, cab->next->p);
+			printf("[PROCESSO %d ACESSOU POSICAO %d].\n", pidDoMenor, removido->p);
 			sem_post(&mutexPrint);
 		}
 
@@ -137,7 +140,7 @@ void *Gerenciador(void *a) {
 			int inicio = tabelaProcessos[pidDoMenor].myLink->base;			
 			
 			// ja tem o link, basta remover da memoria
-			escreveNaMemoriaVirtual((char)-1, inicio*16, nbytes);
+			escreveNoArquivoVirtual((char)-1, inicio*16, nbytes);
 			removeProcess(tabelaProcessos[pidDoMenor].myLink);
 			
 			tabelaProcessos[pidDoMenor].end = 1;
@@ -213,7 +216,7 @@ int compare_arrive(const void *a, const void *b) {
 	else return 0;
 }
 
-static void* Malloc(size_t bytes) {
+void* Malloc(size_t bytes) {
 	void* p = malloc(bytes);
 
 	if (!p) {
@@ -224,32 +227,44 @@ static void* Malloc(size_t bytes) {
 	return p;
 }
 
-/*int main(int argc, char* argv[]) {
-	int status;
+/*************** LISTA para os P's do arqEntrada **********************/
+
+Node initNodeList() {
+	Node cab = Malloc(sizeof(*cab));
 	
-	if (argc != 1) {
-		printf("Formato esperado:\n./ep2\n");
-		return 0;
-	}
+	cab->p = -1;
+	cab->t = -1;
+	cab->next = NULL;
 
-	inicializaSemaforos();
-
-	while (1) {
-		status = shell();
-		
-		if (status == 0) {
-			printf("Gerencia Espaco Livre: %d\nSubstituicao Pagina: %d\nIntervalo: %f\n\n", 
-					numGerEspLiv, numSubsPag, intervalo);
-			gettimeofday(&inicio, NULL);
-			
-			inicializaMemoriaVirtual(memVirtual);
-			initList(memVirtual);		
-			simulador();
-			freeList();
-		}
-		else break;
-	}
-
-	return 0;
+	return cab;	
 }
-*/
+
+Node insertNodeList(Node ant, int p, int t) {
+	Node novo = Malloc(sizeof(*novo));
+	novo->p = p;
+	novo->t = t;
+
+	//novo->next = aux->next;
+	novo->next = NULL;
+	ant->next = novo;
+
+	return novo;
+}
+
+Node removeNodeList(Node cab) {	
+	Node removido;
+
+	if (!emptyNodeList(cab)) {
+		removido = cab->next;
+		cab->next = removido->next;
+	} else {
+		printf("Não era pra estar vazia a lista!\n");
+		exit(0);
+	}
+
+	return removido;
+}
+
+int emptyNodeList(Node cab) {
+	return cab->next == NULL;
+}

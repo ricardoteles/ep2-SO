@@ -21,7 +21,7 @@ void imprimeMemoriaVirtual() {
 	fclose(arq);
 }
 
-void escreveNaMemoriaVirtual(char pid, int inicio, int nbytes) {
+void escreveNoArquivoVirtual(char pid, int inicio, int nbytes) {
 	int i;
 	char myPID = pid;
 

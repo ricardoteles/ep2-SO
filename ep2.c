@@ -19,14 +19,6 @@ void leArquivoEntrada();
 void criaArquivosMemoria();
 void imprimeArquivos();
 
-/*************** LISTA para os (pi,ti) do arqEntrada **********************/
-Node initNodeList();
-Node insertNodeList(Node ant, int p, int t);
-void removeNodeList(Node cab);
-int emptyNodeList(Node cab);
-Node mallocNodeList();
-void freeNodeList(Node cab);
-/*=====================================================================================*/
 
 int main() {
 	int status = 1;
@@ -185,54 +177,17 @@ void leArquivoEntrada() {
 		arqEntrada = NULL;
 		return ;
 	}
-}
 
-/*************** LISTA para os P's do arqEntrada **********************/
+	pagina = (int*)Malloc((memVirtual/16)*sizeof(int));
 
-Node initNodeList() {
-	Node cab = mallocNodeList();
-	
-	cab->p = -1;
-	cab->t = -1;
-	cab->next = NULL;
-
-	return cab;	
-}
-
-Node insertNodeList(Node ant, int p, int t) {
-	Node novo = mallocNodeList();
-	novo->p = p;
-	novo->t = t;
-
-	//novo->next = aux->next;
-	novo->next = NULL;
-	ant->next = novo;
-
-	return novo;
-}
-
-void removeNodeList(Node cab) {	
-	if (!emptyNodeList(cab)) {
-		Node removido = cab->next;
-		cab->next = removido->next;
-		free(removido);
-		removido = NULL;
-	} else {
-		printf("Não era pra estar vazia a lista!\n");
-		exit(0);
-	}
-}
-
-int emptyNodeList(Node cab) {
-	return cab->next == NULL;
-}
-
-Node mallocNodeList() {
-	Node p = (Node) malloc(sizeof(Position));
-	if (!p) {
-		fprintf(stderr, "Memoria insuficiente!\n");
-		exit(1);
+	for(i = 0; i < (memVirtual/16); i++){
+		pagina[i] = -1;
 	}
 
-	return p;
-} 
+	quadrosUsados = (int*)Malloc((memTotal/16)*sizeof(int));
+
+	for(i = 0; i < (memTotal/16); i++){
+		quadrosUsados[i] = 0;
+	}
+
+}
