@@ -42,8 +42,7 @@ int main() {
 int interpretaComandosShell() {
 	int aux, i;
 	
-	/*carrega*/
-	if (strcmp(word[0], "c") == 0) {
+	if (strcmp(word[0], "carrega") == 0) {
 		arqEntrada = fopen(word[1], "r");
 
 		if (!arqEntrada) {
@@ -53,8 +52,7 @@ int interpretaComandosShell() {
 		leArquivoEntrada();
 	}
 
-	/*espaco*/
-	else if (strcmp(word[0], "e") == 0) {
+	else if (strcmp(word[0], "espaco") == 0) {
 		aux = atoi(word[1]);
 
 		if (aux < 1 || aux > 3) {
@@ -65,8 +63,7 @@ int interpretaComandosShell() {
 		}
 	}
 
-	/*substitui*/
-	else if (strcmp(word[0], "s") == 0) {
+	else if (strcmp(word[0], "substitui") == 0) {
 		aux = atoi(word[1]);
 		
 		if (aux < 1 || aux > 4) {
@@ -77,8 +74,7 @@ int interpretaComandosShell() {
 		}
 	}
 
-	/* executa */
-	else if (strcmp(word[0], "x") == 0) {
+	else if (strcmp(word[0], "executa") == 0) {
 		intervalo = atof(word[1]);
 		int i;
 
