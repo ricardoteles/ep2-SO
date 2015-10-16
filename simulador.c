@@ -16,7 +16,8 @@ static float tempoDesdeInicio();
 static void inicializaGlobais();
 
 void *Debug(void *a);
-void *Gerenciador(void *a);
+void *ResetBitR(void *a);
+void Gerenciador();
 
 void simulador() {
 	gettimeofday(&inicio, NULL);
@@ -27,7 +28,7 @@ void simulador() {
 	inicializaMemoriaFisica(memTotal);
 	head = initList(memVirtual);
 
-	pthread_t debug, gerenciador;
+	pthread_t debug, reset;
 
 	qsort(tabelaProcessos, nProcs, sizeof(Process), compare_arrive);
 	
@@ -41,18 +42,19 @@ void simulador() {
 			tabelaProcessos[i].nbytes += (16 - resto);
 	}
 
-	printf("nProcs = %d\n", nProcs);
 	if (pthread_create(&debug, NULL, Debug, (void *) NULL)) {
         printf("\n ERROR creating thread debug.\n");
         exit(1);
 	}
-	if (pthread_create(&gerenciador, NULL, Gerenciador, (void *) &inicio)) {
-        printf("\n ERROR creating thread Debug\n");
+	if (pthread_create(&reset, NULL, ResetBitR, (void *) &inicio)) {
+        printf("\n ERROR creating thread Reset\n");
         exit(1);
 	}
 
-	if (pthread_join(gerenciador, NULL)) {
-		printf("\n ERROR joining thread gerenciador\n");
+	Gerenciador();
+
+	if (pthread_join(reset, NULL)) {
+		printf("\n ERROR joining thread reset\n");
 		exit(1);
     }
 
@@ -67,14 +69,12 @@ void simulador() {
 	}
 }
 
-void *Gerenciador(void *a) {
+void Gerenciador() {
 	int menorTempoProx, pidDoMenor;
 	Node cab, removido;
 	int i;
 
 	initQueue();
-
-	struct timeval inicio = *((struct timeval*) a);
 
 	while (deadProcs < nProcs) {
 		menorTempoProx = 100;
@@ -154,8 +154,6 @@ void *Gerenciador(void *a) {
 			sem_post(&mutexPrint);
 		}
 	}
-
-	return NULL;
 }
 
 void alocaEspacoLivre(int tamanho, int pid) {
@@ -166,27 +164,43 @@ void alocaEspacoLivre(int tamanho, int pid) {
 		case 2:	nextFit(head, tamanho, pid);
 				break;
 
-		case 3:	quickFit(tamanho, pid);
+		case 3:	//quickFit(tamanho, pid);
 				break;
 	}
 }
 
-void *Debug(void *a) {
-	float wait;
-	struct timeval inicio;
+void *ResetBitR(void *a) {
+	LinkQ aux;
 
 	while (deadProcs < nProcs) {
-		gettimeofday(&inicio, NULL);
+		usleep(1000000);
 
-		// (int)(intervalo-wait)*1000000 ?
-		while ((wait = tempoDesdeInicio(inicio)) < intervalo) 
+		for (aux = headQ->prox; aux != NULL; aux = aux->prox) {
+			if (aux->bitR) {
+				aux->bitR = 0;
+			}
+		}
+	}
+
+	return NULL;
+}
+
+
+void *Debug(void *a) {
+	float wait;
+	struct timeval inicioDeb;
+
+	while (deadProcs < nProcs) {
+		gettimeofday(&inicioDeb, NULL);
+
+		while ((wait = tempoDesdeInicio(inicioDeb)) < intervalo) 
 			usleep(10000);
 
 		sem_wait(&mutexPrint);
 		printf("\n--------------------- Status da memoria: ---------------------\n");
 		printList(head);
-		// imprimeMemoriaVirtual();
-		// printf("\n");
+		imprimeMemoriaVirtual();
+		printf("\n");
 		imprimeMemoriaFisica();
 		printf("\n--------------------------------------------------------------\n");
 		sem_post(&mutexPrint);

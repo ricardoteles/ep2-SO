@@ -60,17 +60,17 @@ void desalocaQuadros(int base, int tam) {
 static int substituiPagina(){
 
 	switch(numSubsPag){
-		case 1:	printf("NRU\n");
+		case 1:	
 				return NRU();
 
-		case 2: printf("FIFO\n");
+		case 2: 
 				return FIFO();
 
-		case 3: printf("SecondChance\n");
+		case 3:
 				return SecondChance();
 			
 		case 4: return LRU();
-				printf("LRU\n");
+			
 	}
 }
 
@@ -90,9 +90,25 @@ static int mapeiaPosicaoProcesoParaPagina(Link proc, int p){
 	return (proc->base + p)/16;
 }
 
-int NRU(){	/*TO DO: precisa implementar*/
-	return 0;
+
+int NRU(){	
+	int pag = 0;
+	LinkQ aux;
+
+	for (aux = headQ; aux->prox != NULL; aux = aux->prox) {
+		if (aux->prox->bitR == 0) { 
+			pag = removeItemQueue(aux);
+			printf("[NRU] Pag: %d\n", pag);
+			return pag;
+		}
+	}
+
+	pag = removeItemQueue(headQ);
+	printf("[NRU] Pag: %d\n", pag);
+	
+	return pag;
 }
+
 
 int FIFO(){
 	return removeItemQueue(headQ);
@@ -113,7 +129,7 @@ int SecondChance(){
 	}
 }
 
-int LRU(){  /*TO DO: precisa implementar*/
+int LRU(){ 
 	return 0;
 }
 
