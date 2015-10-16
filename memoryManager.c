@@ -62,7 +62,7 @@ void inicializaTabelaQuick() {
 
 void inserePonteiroTabelaQuick(int tamanhoLacuna, Link p){
 	int tamanho, i;
-	LinkQT novo = Malloc(sizeof(*novo));
+	LinkQT novo = (LinkQT) Malloc(sizeof(QT));
 
 	for(i = 0; i < SIZE_QUICK; i++){
 		tamanho = pow(2, i)*16;

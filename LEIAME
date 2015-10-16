@@ -11,7 +11,7 @@ Aluno: Ricardo Oliveira Teles				NºUSP: 7991444
 /*******************************************/
 
 
-1) Para compilar e rodar o ep2 é necessário ter o pacote libreadline-dev (no Debian) já instalado, já que o programa usa as funcionalidades das bibliotecas GNU readline e GNU history (Mais informações podem ser vistas na documentação da biblioteca em ftp://ftp.gnu.org/pub/gnu/readline/). Além diss, esse programa usa a biblioteca pthreads
+1) Esse ep foi feito na linguagem C. Para compilar e rodar o ep2 é necessário ter o pacote libreadline-dev (no Debian) já instalado, já que o programa usa as funcionalidades das bibliotecas GNU readline e GNU history (Mais informações podem ser vistas na documentação da biblioteca em ftp://ftp.gnu.org/pub/gnu/readline/). Além disso, esse programa usa a biblioteca pthreads e a libmath.
 
 2) Com a instalação do pacote já feita, basta abrir o terminal e digitar:
 
@@ -24,9 +24,9 @@ $ ./ep2
 -> "carrega <arquivo>": onde <arquivo> é o arquivo de trace a ser simulado
 
 -> "espaco <num>": onde <num> é o número do algoritmo de gerenciamento de espaço livre, conforme abaixo:
-					1. First Fit 						(implementado)
-					2. Next Fit 						(implementado)
-					3. Quick Fit 						(não foi implementado)
+					1. First Fit					(implementado)
+					2. Next Fit 					(implementado)
+					3. Quick Fit					(não foi implementado, mas houve a tentativa)
 
 -> "substitui <num>": onde <num> é o número do algoritmo de substituição de página, conforme abaixo:
 					1. Not Recently Used Page			(implementado)

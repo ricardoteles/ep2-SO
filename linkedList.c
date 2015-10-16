@@ -22,8 +22,8 @@ Link initList(int totalMemoria) {
 	insertItemList(head, 'L', 0, totalMemoria);
 
 	if(numGerEspLiv == 3){
-		inicializaTabelaQuick();
-		inserePonteiroTabelaQuick(totalMemoria, head->prox);
+		// inicializaTabelaQuick();
+		// inserePonteiroTabelaQuick(totalMemoria, head->prox);
 	}
 
 	return head;
