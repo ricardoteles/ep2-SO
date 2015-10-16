@@ -65,16 +65,13 @@ void simulador() {
 		printf("\n ERROR destroying mutexPrint\n");
 		exit(1);	
 	}
-
-	imprimePaginas();
-	imprimeMemoriaFisica();
 }
 
 void *Gerenciador(void *a) {
 	int menorTempoProx, pidDoMenor;
+	Node cab, removido;
 	int i;
-	Node cab;
-	Node removido;
+
 	initQueue();
 
 	struct timeval inicio = *((struct timeval*) a);

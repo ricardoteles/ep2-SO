@@ -16,7 +16,6 @@ LinkQ headQ, tailQ;
 void initQueue();
 void insertItemQueue(LinkQ aux, int num, int bitR);
 void printQueue();
-LinkQ mallocItemQueue();
 int removeItemQueue(LinkQ aux);
 
 int FIFO();

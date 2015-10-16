@@ -35,10 +35,18 @@ void alocaQuadro(Link proc, int p, int pid){
 
 void desalocaQuadros(int base, int tam) {
 	int i;
+	LinkQ aux;
 
 	for(i = (base/16); i < (base+tam)/16; i++){
 
 		if(pagina[i] != -1){					/*desaloca*/
+			for(aux = headQ; aux->prox != NULL; aux = aux->prox){
+				if(aux->prox->num == pagina[i]){ 
+					removeItemQueue(aux);
+					break;
+				}
+			}	
+
 			quadrosUsados[pagina[i]] = 0;
 			escreveNoArquivoFisico((char) -1, pagina[i]*16, 16);
 			printf("Desalocou quadro: %d\n", pagina[i]);
@@ -121,7 +129,7 @@ int LRU(){  /*TO DO: precisa implementar*/
 
 /********************* FUNCOES ****************************************/
 void initQueue() {
-	headQ = mallocItemQueue();
+	headQ = Malloc(sizeof(*headQ));
 	
 	headQ->num = -1;
 	headQ->prox = NULL;
@@ -129,7 +137,7 @@ void initQueue() {
 }
 
 void insertItemQueue(LinkQ aux, int num, int bitR) {
-	LinkQ novo = mallocItemQueue();
+	LinkQ novo = Malloc(sizeof(*novo));
 	novo->num = num;
 	novo->bitR = bitR;
 	
@@ -149,16 +157,6 @@ void printQueue() {
 		printf("%d  ", aux->num);
 	}
 	printf("FIM\n\n");
-}
-
-LinkQ mallocItemQueue() {
-	LinkQ p = (LinkQ) malloc(sizeof(Quadro));
-	if (!p) {
-		fprintf(stderr, "Memoria insuficiente!\n");
-		exit(1);
-	}
-
-	return p;
 }
 
 int removeItemQueue(LinkQ aux) {
