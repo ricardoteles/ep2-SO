@@ -20,7 +20,7 @@ typedef struct {
 	Link myLink;		// ponteiro para o processo alocado, na lista
 	int start, end;
 	int nbytes;  
-} Process; // nome trace parece melhor :)
+} Process;
 
 
 /***************  VARIAVEIS DE ENTRADA DO SIMULADOR ***************************/
@@ -39,8 +39,8 @@ Node insertNodeList(Node ant, int p, int t);
 Node removeNodeList(Node cab);
 int emptyNodeList(Node cab);
 void freeNodeList(Node cab);
-/*=====================================================================================*/
 
+/***************************************************************************/
 void simulador();
 void* Malloc(size_t bytes);
 

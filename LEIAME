@@ -2,7 +2,7 @@ Aluno: Fábio Eduardo Kaspar					NºUSP: 7991166
 Aluno: Ricardo Oliveira Teles				NºUSP: 7991444
 
 
-										LEAIME
+										LEIAME
 =======================================================================================================
 
 
@@ -11,24 +11,34 @@ Aluno: Ricardo Oliveira Teles				NºUSP: 7991444
 /*******************************************/
 
 
-1) Para compilar e rodar o ep2 é necessário ter o pacote libreadline-dev (no Debian) já instalado, já que o programa usa as funcionalidades das bibliotecas GNU readline e GNU history. 
+1) Para compilar e rodar o ep2 é necessário ter o pacote libreadline-dev (no Debian) já instalado, já que o programa usa as funcionalidades das bibliotecas GNU readline e GNU history (Mais informações podem ser vistas na documentação da biblioteca em ftp://ftp.gnu.org/pub/gnu/readline/). Além diss, esse programa usa a biblioteca pthreads
 
 2) Com a instalação do pacote já feita, basta abrir o terminal e digitar:
 
 $ make 
-$ ./ep2 <arquivo de entrada>    OU		$ ./ep2   
+$ ./ep2   
 
 
 3) Depois disso abrirá o Shell do EP2. Esse shell aceita os seguintes comandos (sem as aspas):
 
--> "carrega <arquivo>": 
+-> "carrega <arquivo>": onde <arquivo> é o arquivo de trace a ser simulado
 
--> "espaco <num>": 
+-> "espaco <num>": onde <num> é o número do algoritmo de gerenciamento de espaço livre, conforme abaixo:
+					1. First Fit 						(implementado)
+					2. Next Fit 						(implementado)
+					3. Quick Fit 						(não foi implementado)
 
--> "substitui <num>": 
+-> "substitui <num>": onde <num> é o número do algoritmo de substituição de página, conforme abaixo:
+					1. Not Recently Used Page			(implementado)
+					2. First-In, First-Out				(implementado)
+					3. Second-Chance Page				(implementado)
+					4. Least Recently Used Page			(não foi implementado)
 
--> "executa <intervalo>": 
+
+-> "executa <intervalo>": onde <intervalo> é o tempo o qual será impresso informações sobre a memória. 
 
 -> "sai": fecha o prompt do EP2
+
+OBS: Antes de iniciar o simulador com o comando "executa", deve-se atribuir o nome do arquivo de trace e o número dos algoritmos de gerenciamento de espaco livre e de substituição de página  
 
 =======================================================================================================

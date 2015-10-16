@@ -2,10 +2,13 @@
 #include "paginacao.h"
 #include "simulador.h"
 
-static int mapeiaPosicaoProcesoParaPagina(Link proc, int p);
-static int firstFitMemReal();
 static int substituiPagina();
-static void imprimeQuadro();
+static int firstFitMemReal();
+static int mapeiaPosicaoProcesoParaPagina(Link proc, int p);
+
+static void insertItemQueue(LinkQ aux, int num, int bitR);
+static int removeItemQueue(LinkQ aux);
+
 
 void alocaQuadro(Link proc, int p, int pid){
 	int indiceQuadro;
@@ -27,7 +30,6 @@ void alocaQuadro(Link proc, int p, int pid){
 		
 		pagina[indicePagina] = indiceQuadro;
 		quadrosUsados[indiceQuadro] = 1;
-		imprimePaginas();
 		escreveNoArquivoFisico((char) pid, indiceQuadro*16, 16);
 		insertItemQueue(tailQ, indiceQuadro, 1);
 	}	
@@ -49,8 +51,6 @@ void desalocaQuadros(int base, int tam) {
 
 			quadrosUsados[pagina[i]] = 0;
 			escreveNoArquivoFisico((char) -1, pagina[i]*16, 16);
-			printf("Desalocou quadro: %d\n", pagina[i]);
-			imprimePaginas();
 			
 			pagina[i] = -1;			
 		}
@@ -90,16 +90,6 @@ static int mapeiaPosicaoProcesoParaPagina(Link proc, int p){
 	return (proc->base + p)/16;
 }
 
-static void imprimeQuadro(){
-	int i;
-
-	printf("Quadros: ");
-	for(i = 0; i < (memTotal/16); i++){
-		printf("%d ", quadrosUsados[i]);
-	}
-	printf("\n");
-}
-
 int NRU(){	/*TO DO: precisa implementar*/
 	return 0;
 }
@@ -127,7 +117,7 @@ int LRU(){  /*TO DO: precisa implementar*/
 	return 0;
 }
 
-/********************* FUNCOES ****************************************/
+/********************* Lista ligada simples para os quadros de PAginas ******************************/
 void initQueue() {
 	headQ = Malloc(sizeof(*headQ));
 	
@@ -136,7 +126,7 @@ void initQueue() {
 	tailQ = headQ;
 }
 
-void insertItemQueue(LinkQ aux, int num, int bitR) {
+static void insertItemQueue(LinkQ aux, int num, int bitR) {
 	LinkQ novo = Malloc(sizeof(*novo));
 	novo->num = num;
 	novo->bitR = bitR;
@@ -149,17 +139,7 @@ void insertItemQueue(LinkQ aux, int num, int bitR) {
 	}
 }
 
-void printQueue() {
-	LinkQ aux;
-
-	printf("Queue: \n");
-	for(aux = headQ->prox; aux != NULL; aux = aux->prox) {
-		printf("%d  ", aux->num);
-	}
-	printf("FIM\n\n");
-}
-
-int removeItemQueue(LinkQ aux) {
+static int removeItemQueue(LinkQ aux) {
 	LinkQ rem = aux->prox;
 	int num;
 
@@ -171,14 +151,4 @@ int removeItemQueue(LinkQ aux) {
 	free(rem); 
 
 	return num;
-}
-
-int imprimePaginas(){
-	int i;
-
-	printf("Paginas: ");
-	for(i = 0; i < (memVirtual/16); i++){
-		printf("%d  ", pagina[i]);
-	}	
-	printf("\n");
 }

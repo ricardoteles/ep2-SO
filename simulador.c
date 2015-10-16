@@ -158,15 +158,6 @@ void *Gerenciador(void *a) {
 	return NULL;
 }
 
-static void inicializaGlobais() {
-	deadProcs = 0;
-
-	if (sem_init(&mutexPrint, 0, 1)) {
-		fprintf(stderr, "ERRO ao criar semaforo mutexPrint\n");
-		exit(0);
-	}
-}
-
 void alocaEspacoLivre(int tamanho, int pid) {
 	switch(numGerEspLiv) {
 		case 1: firstFit(head, tamanho, pid);
@@ -201,6 +192,16 @@ void *Debug(void *a) {
 		sem_post(&mutexPrint);
 	}
 }
+
+static void inicializaGlobais() {
+	deadProcs = 0;
+
+	if (sem_init(&mutexPrint, 0, 1)) {
+		fprintf(stderr, "ERRO ao criar semaforo mutexPrint\n");
+		exit(0);
+	}
+}
+
 
 float tempoDesdeInicio(struct timeval inicio) {
 	struct timeval fim;

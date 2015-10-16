@@ -11,12 +11,9 @@ typedef struct segmento {
 	Link ant;
 } Segmento;
 
-
 Link initList(int totalMemoria);
-//void freeList();
 void insertItemList(Link anterior, char info, int base, int tamanho);
 void removeItemList(Link removido);
 void printList(Link head);
-Link mallocItemList();
 
 #endif

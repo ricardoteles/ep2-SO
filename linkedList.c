@@ -1,10 +1,11 @@
 #include "linkedList.h"
+#include "simulador.h"
 #include <stdlib.h>
 #include <stdio.h>
 
 Link initList(int totalMemoria) {
-	Link head = mallocItemList();
-	Link tail = mallocItemList();
+	Link head = Malloc(sizeof(*head));
+	Link tail = Malloc(sizeof(*tail));
 	
 	head->info = 'P';
 	head->base = -1;
@@ -24,7 +25,7 @@ Link initList(int totalMemoria) {
 }
 
 void insertItemList(Link anterior, char info, int base, int tamanho) {
-	Link novo = mallocItemList();
+	Link novo = Malloc(sizeof(*novo));
 	novo->info = info;
 	novo->base = base;
 	novo->tamanho = tamanho;
@@ -53,14 +54,4 @@ void printList(Link head) {
 		printf("[%c | %d | %d] -> ", aux->info, aux->base, aux->tamanho);
 	}
 	printf("[TAIL]\n\n");
-}
-
-Link mallocItemList() {
-	Link p = (Link) malloc(sizeof(Segmento));
-	if (!p) {
-		fprintf(stderr, "Memoria insuficiente!\n");
-		exit(1);
-	}
-
-	return p;
 }

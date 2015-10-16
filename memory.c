@@ -5,7 +5,7 @@
 static FILE* arq;
 
 void imprimeMemoriaVirtual() {
-	char val, i;
+	char val;
 	arq = fopen("/tmp/ep2.vir", "rb");
 	
 	printf("Memoria Virtual:\n");
@@ -15,8 +15,6 @@ void imprimeMemoriaVirtual() {
 			printf("%d ", val);
 		}
 	}
-
-	printf("\n");
 
 	fclose(arq);
 }
@@ -49,7 +47,7 @@ void inicializaMemoriaVirtual(int totalMemoria) {
 }
 
 void imprimeMemoriaFisica() {
-	char val, i;
+	char val;
 	arq = fopen("/tmp/ep2.mem", "rb");
 	
 	printf("Memoria Fisica:\n");
@@ -59,8 +57,6 @@ void imprimeMemoriaFisica() {
 			printf("%d ", val);
 		}
 	}
-
-	printf("\n");
 
 	fclose(arq);
 }

@@ -13,18 +13,14 @@ struct quadro{
 
 LinkQ headQ, tailQ;
 
-void initQueue();
-void insertItemQueue(LinkQ aux, int num, int bitR);
-void printQueue();
-int removeItemQueue(LinkQ aux);
+void alocaQuadro(Link proc, int p, int pid);
+void desalocaQuadros(int base, int tam);
 
 int FIFO();
 int SecondChance();
 int NRU();
 int LRU();
 
-void alocaQuadro(Link proc, int p, int pid);
-void desalocaQuadros(int base, int tam);
-int imprimePaginas();
+void initQueue();
 
 #endif
