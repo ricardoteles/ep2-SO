@@ -60,14 +60,11 @@ void desalocaQuadros(int base, int tam) {
 static int substituiPagina(){
 
 	switch(numSubsPag){
-		case 1:	
-				return NRU();
+		case 1:	return NRU();
 
-		case 2: 
-				return FIFO();
+		case 2: return FIFO();
 
-		case 3:
-				return SecondChance();
+		case 3: return SecondChance();
 			
 		case 4: return LRU();
 			
@@ -127,8 +124,20 @@ int SecondChance(){
 	}
 }
 
+//opcao 3
 int LRU(){ 
-	return 0;
+	int menorContador = 100000;
+	LinkQ aux;
+	LinkQ remProx;
+
+	for (aux = headQ; aux->prox != NULL; aux = aux->prox) {
+		if (aux->prox->contador < menorContador) { 
+			menorContador = aux->prox->contador;
+			remProx = aux;
+		}
+	}
+
+	return removeItemQueue(remProx);;
 }
 
 /********************* Lista ligada simples para os quadros de PAginas ******************************/
@@ -144,6 +153,7 @@ static void insertItemQueue(LinkQ aux, int num, int bitR) {
 	LinkQ novo = Malloc(sizeof(*novo));
 	novo->num = num;
 	novo->bitR = bitR;
+	novo->contador = 0;
 	
 	novo->prox = aux->prox;
 	aux->prox = novo;

@@ -164,6 +164,7 @@ void *ResetBitR(void *a) {
 
 		for (aux = headQ->prox; aux != NULL; aux = aux->prox) {
 			if (aux->bitR) {
+				aux->contador += aux->bitR;
 				aux->bitR = 0;
 			}
 		}

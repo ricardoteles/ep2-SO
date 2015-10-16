@@ -8,6 +8,7 @@ typedef struct quadro* LinkQ;
 struct quadro{
 	int num;
 	int bitR;
+	int contador;
 	LinkQ prox;
 } Quadro;
 

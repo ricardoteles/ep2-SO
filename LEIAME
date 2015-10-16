@@ -32,7 +32,7 @@ $ ./ep2
 					1. Not Recently Used Page			(implementado)
 					2. First-In, First-Out				(implementado)
 					3. Second-Chance Page				(implementado)
-					4. Least Recently Used Page			(não foi implementado)
+					4. Least Recently Used Page			(implementado)
 
 
 -> "executa <intervalo>": onde <intervalo> é o tempo o qual será impresso informações sobre a memória. 
