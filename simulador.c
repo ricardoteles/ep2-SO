@@ -87,7 +87,6 @@ void Gerenciador() {
 			cab = tabelaProcessos[i].listaTrace;
 			
 			if (emptyNodeList(cab)) {
-				printf("Lista vazia ? Indice estranho: %d\n", i);
 				exit(0);
 			}
 
@@ -119,19 +118,11 @@ void Gerenciador() {
 	    	// ja precisa ter o link definido após alocação 
 			inicio = tabelaProcessos[pidDoMenor].myLink->base;
 	        escreveNoArquivoVirtual((char) pidDoMenor, inicio, nbytes);
-			
-			sem_wait(&mutexPrint);
-			printf("[PROCESSO %d ALOCADO].\n", pidDoMenor);
-			sem_post(&mutexPrint);
 		}
 
 		// acesso a posicao (pagina)
 		else if (!emptyNodeList(cab)) {
 			alocaQuadro(tabelaProcessos[pidDoMenor].myLink, removido->p, pidDoMenor);
-
-			sem_wait(&mutexPrint);
-			printf("[PROCESSO %d ACESSOU POSICAO %d].\n", pidDoMenor, removido->p);
-			sem_post(&mutexPrint);
 		}
 
 		// desalocação do processo
@@ -147,11 +138,7 @@ void Gerenciador() {
 			removeProcess(tabelaProcessos[pidDoMenor].myLink);
 			
 			tabelaProcessos[pidDoMenor].end = 1;
-			deadProcs++;
-			
-			sem_wait(&mutexPrint);
-			printf("[PROCESSO %d DESALOCADO].\n", pidDoMenor);
-			sem_post(&mutexPrint);
+			deadProcs++;			
 		}
 	}
 }
@@ -276,7 +263,6 @@ Node removeNodeList(Node cab) {
 		removido = cab->next;
 		cab->next = removido->next;
 	} else {
-		printf("Não era pra estar vazia a lista!\n");
 		exit(0);
 	}
 

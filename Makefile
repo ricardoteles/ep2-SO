@@ -8,7 +8,7 @@ headers = memoryManager.h linkedList.h process.h simulador.h memory.h paginacao.
 
 all: ep2
 	
-ep2: $(objs) -lreadline -lpthread
+ep2: $(objs) -lreadline -lpthread -lm
 	$(cc) -o $@ $^
 
 %.o: %.c $(headers)

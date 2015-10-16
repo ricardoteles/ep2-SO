@@ -1,13 +1,16 @@
 #include <stdlib.h>
+#include <math.h>
 #include "process.h"
 #include "linkedList.h"
 #include "memoryManager.h"
 
 #define SIZE_QUICK 10 
 
-typedef struct {
-	int tamanho;
-	Link cabList;
+typedef struct qt* LinkQT;
+
+typedef struct qt{
+	Link p;
+	LinkQT nextQT;
 } QT;
 
 static QT quickTable[SIZE_QUICK];
@@ -46,15 +49,48 @@ void nextFit(Link head, int tamanho, int pid) {
 }
 
 void quickFit(int tamanho, int pid) {
-	// inicializaTabelaQuick();
+	
 }
 
-static inicializaTabelaQuick() {
+void inicializaTabelaQuick() {
 	int i;
 
-	quickTable[0].tamanho = 16;
-
 	for (i = 1; i < SIZE_QUICK; i++) {
-		quickTable[i].tamanho = quickTable[i-1].tamanho * 2; 
+		quickTable[i].nextQT = NULL;
+	}
+}
+
+void inserePonteiroTabelaQuick(int tamanhoLacuna, Link p){
+	int tamanho, i;
+	LinkQT novo = Malloc(sizeof(*novo));
+
+	for(i = 0; i < SIZE_QUICK; i++){
+		tamanho = pow(2, i)*16;
+
+		if(tamanhoLacuna <= tamanho){
+			novo->p = p;
+			novo->nextQT = quickTable[i].nextQT;
+			quickTable[i].nextQT = novo;
+		}
+	}
+}
+
+void removePonteiroTabelaQuick(int tamAntigo, Link p){
+	int i, tamanho;
+	LinkQT aux, rem;
+
+	for(i = 0; i < SIZE_QUICK; i++){
+		tamanho = pow(2, i)*16;
+
+		if(tamAntigo <= tamanho){
+			for(aux = quickTable[i].nextQT; aux != NULL; aux = aux->nextQT){
+				if(aux->nextQT->p == p){
+					rem = aux->nextQT;
+					aux = rem->nextQT;
+					free(rem);
+					break;
+				}
+			}
+		}
 	}
 }

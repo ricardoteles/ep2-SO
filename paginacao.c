@@ -98,13 +98,11 @@ int NRU(){
 	for (aux = headQ; aux->prox != NULL; aux = aux->prox) {
 		if (aux->prox->bitR == 0) { 
 			pag = removeItemQueue(aux);
-			printf("[NRU] Pag: %d\n", pag);
 			return pag;
 		}
 	}
 
 	pag = removeItemQueue(headQ);
-	printf("[NRU] Pag: %d\n", pag);
 	
 	return pag;
 }
