@@ -24,7 +24,8 @@ void simulador() {
 	int i, pid, resto;
 	inicializaGlobais();
 	inicializaMemoriaVirtual(memVirtual);
-	head = initList(memVirtual/16);
+	inicializaMemoriaFisica(memTotal);
+	head = initList(memVirtual);
 
 	pthread_t debug, gerenciador;
 
@@ -40,11 +41,11 @@ void simulador() {
 			tabelaProcessos[i].nbytes += (16 - resto);
 	}
 
-	// printf("nProcs = %d\n", nProcs);
-	// if (pthread_create(&debug, NULL, Debug, (void *) NULL)) {
- //        printf("\n ERROR creating thread debug.\n");
- //        exit(1);
-	// }
+	printf("nProcs = %d\n", nProcs);
+	if (pthread_create(&debug, NULL, Debug, (void *) NULL)) {
+        printf("\n ERROR creating thread debug.\n");
+        exit(1);
+	}
 	if (pthread_create(&gerenciador, NULL, Gerenciador, (void *) &inicio)) {
         printf("\n ERROR creating thread Debug\n");
         exit(1);
@@ -55,17 +56,18 @@ void simulador() {
 		exit(1);
     }
 
- //    if (pthread_join(debug, NULL)) {
-	// 	printf("\n ERROR joining thread debug\n");
-	// 	exit(1);
-	// }
+    if (pthread_join(debug, NULL)) {
+		printf("\n ERROR joining thread debug\n");
+		exit(1);
+	}
 
 	if (sem_destroy(&mutexPrint) != 0) {
 		printf("\n ERROR destroying mutexPrint\n");
 		exit(1);	
 	}
 
-	//freeList();
+	imprimePaginas();
+	imprimeMemoriaFisica();
 }
 
 void *Gerenciador(void *a) {
@@ -115,11 +117,11 @@ void *Gerenciador(void *a) {
 			int nbytes = tabelaProcessos[pidDoMenor].nbytes;
 	        
 	        // aloca por unidades de alocação = 1 pagina
-	        alocaEspacoLivre(nbytes/16, pidDoMenor);
+	        alocaEspacoLivre(nbytes, pidDoMenor);
 
 	    	// ja precisa ter o link definido após alocação 
 			inicio = tabelaProcessos[pidDoMenor].myLink->base;
-	        escreveNoArquivoVirtual((char) pidDoMenor, inicio * 16, nbytes);
+	        escreveNoArquivoVirtual((char) pidDoMenor, inicio, nbytes);
 			
 			sem_wait(&mutexPrint);
 			printf("[PROCESSO %d ALOCADO].\n", pidDoMenor);
@@ -128,8 +130,7 @@ void *Gerenciador(void *a) {
 
 		// acesso a posicao (pagina)
 		else if (!emptyNodeList(cab)) {
-			// escreveNoArquivoReal();
-			alocaQuadro(tabelaProcessos[pidDoMenor].myLink, removido->p);
+			alocaQuadro(tabelaProcessos[pidDoMenor].myLink, removido->p, pidDoMenor);
 
 			sem_wait(&mutexPrint);
 			printf("[PROCESSO %d ACESSOU POSICAO %d].\n", pidDoMenor, removido->p);
@@ -142,7 +143,10 @@ void *Gerenciador(void *a) {
 			int inicio = tabelaProcessos[pidDoMenor].myLink->base;			
 			
 			// ja tem o link, basta remover da memoria
-			escreveNoArquivoVirtual((char)-1, inicio*16, nbytes);
+			
+			desalocaQuadros(inicio, nbytes);
+
+			escreveNoArquivoVirtual((char)-1, inicio, nbytes);
 			removeProcess(tabelaProcessos[pidDoMenor].myLink);
 			
 			tabelaProcessos[pidDoMenor].end = 1;
@@ -193,7 +197,9 @@ void *Debug(void *a) {
 		sem_wait(&mutexPrint);
 		printf("\n--------------------- Status da memoria: ---------------------\n");
 		printList(head);
-		imprimeMemoriaVirtual();
+		// imprimeMemoriaVirtual();
+		// printf("\n");
+		imprimeMemoriaFisica();
 		printf("\n--------------------------------------------------------------\n");
 		sem_post(&mutexPrint);
 	}

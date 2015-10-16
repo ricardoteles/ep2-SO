@@ -23,13 +23,6 @@ Link initList(int totalMemoria) {
 	return head;
 }
 
-// void freeList() {
-// 	free(tail);
-// 	free(head);
-// 	tail = NULL;
-// 	head = NULL;
-// }
-
 void insertItemList(Link anterior, char info, int base, int tamanho) {
 	Link novo = mallocItemList();
 	novo->info = info;
@@ -55,11 +48,11 @@ void removeItemList(Link removido) {
 void printList(Link head) {
 	Link aux;
 
-	printf("HEAD: \n");
+	printf("Lista: [HEAD] -> ");
 	for(aux = head->prox; aux->prox != NULL; aux = aux->prox) {
-		printf("%c %d %d\n", aux->info, aux->base, aux->tamanho);
+		printf("[%c | %d | %d] -> ", aux->info, aux->base, aux->tamanho);
 	}
-	printf("TAIL\n\n");
+	printf("[TAIL]\n\n");
 }
 
 Link mallocItemList() {

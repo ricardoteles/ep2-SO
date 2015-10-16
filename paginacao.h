@@ -24,6 +24,8 @@ int SecondChance();
 int NRU();
 int LRU();
 
-void alocaQuadro(Link proc, int p);
+void alocaQuadro(Link proc, int p, int pid);
+void desalocaQuadros(int base, int tam);
+int imprimePaginas();
 
 #endif

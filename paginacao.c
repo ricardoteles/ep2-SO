@@ -7,17 +7,46 @@ static int firstFitMemReal();
 static int substituiPagina();
 static void imprimeQuadro();
 
-void alocaQuadro(Link proc, int p){
-	int indiceQuadro = firstFitMemReal();
+void alocaQuadro(Link proc, int p, int pid){
+	int indiceQuadro;
 	int indicePagina = mapeiaPosicaoProcesoParaPagina(proc, p);
+	int i;
 
-	if(indiceQuadro == -1){
-		indiceQuadro = substituiPagina();
+	if(pagina[indicePagina] == -1){						/*pagina nao referenciada*/
+		indiceQuadro = firstFitMemReal();
+	
+		if(indiceQuadro == -1){							/*memFisica lotada*/
+			indiceQuadro = substituiPagina();
+
+			for(i = 0; i < (memVirtual/16); i++){		/*seta a pagina antiga para -1*/
+				if(pagina[i] == indiceQuadro) {
+					pagina[i] = -1;
+				}
+			}		
+		}
+		
+		pagina[indicePagina] = indiceQuadro;
+		quadrosUsados[indiceQuadro] = 1;
+		imprimePaginas();
+		escreveNoArquivoFisico((char) pid, indiceQuadro*16, 16);
+		insertItemQueue(tailQ, indiceQuadro, 1);
+	}	
+}
+
+void desalocaQuadros(int base, int tam) {
+	int i;
+
+	for(i = (base/16); i < (base+tam)/16; i++){
+
+		if(pagina[i] != -1){					/*desaloca*/
+			quadrosUsados[pagina[i]] = 0;
+			escreveNoArquivoFisico((char) -1, pagina[i]*16, 16);
+			printf("Desalocou quadro: %d\n", pagina[i]);
+			imprimePaginas();
+			
+			pagina[i] = -1;			
+		}
 	}
-
-	pagina[indicePagina] = indiceQuadro;
-	quadrosUsados[indiceQuadro] = 1;
-	insertItemQueue(tailQ, indiceQuadro, 1);
 }
 
 static int substituiPagina(){
@@ -144,4 +173,14 @@ int removeItemQueue(LinkQ aux) {
 	free(rem); 
 
 	return num;
+}
+
+int imprimePaginas(){
+	int i;
+
+	printf("Paginas: ");
+	for(i = 0; i < (memVirtual/16); i++){
+		printf("%d  ", pagina[i]);
+	}	
+	printf("\n");
 }
